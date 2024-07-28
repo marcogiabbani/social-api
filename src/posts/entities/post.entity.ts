@@ -6,21 +6,27 @@ import {
 } from 'typeorm';
 
 @Entity()
-export default class Post {
+export class Post {
+  constructor(title: string, content: string) {
+    this.title = title;
+    this.content = content;
+    // createdAt and updatedAt will be handled by TypeORM
+  }
+
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @CreateDateColumn({
     type: 'timestamp',
     name: 'created_at',
   })
-  createdAt: Date;
+  createdAt!: Date;
 
   @CreateDateColumn({
     type: 'timestamp',
     name: 'updated_at',
   })
-  updatedAt: Date;
+  updatedAt!: Date;
 
   @Column()
   public title: string;
