@@ -1,15 +1,15 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
-  CreateDateColumn,
 } from 'typeorm';
 
 @Entity()
-export class Post {
-  constructor(title: string, content: string) {
-    this.title = title;
-    this.content = content;
+export class User {
+  constructor(email: string, password: string) {
+    this.email = email;
+    this.password = password;
   }
 
   @PrimaryGeneratedColumn('uuid')
@@ -28,8 +28,8 @@ export class Post {
   updatedAt!: Date;
 
   @Column()
-  public title: string;
+  public email: string;
 
   @Column()
-  public content: string;
+  public password: string;
 }
