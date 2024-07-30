@@ -95,16 +95,16 @@ describe('UsersService', () => {
   describe('remove', () => {
     describe('when remove is called', () => {
       let response: any;
-      const removeSpy = jest
-        .spyOn(userRepositoryMock, 'delete')
-        .mockResolvedValue('ok');
+      //   const removeSpy = jest
+      //     .spyOn(userRepositoryMock, 'delete')
+      //     .mockResolvedValue('ok');
 
       beforeEach(async () => {
         response = await service.remove(userMock().id);
       });
 
       test('then it should call delete with the id', () => {
-        expect(removeSpy).toHaveBeenCalledWith(userMock().id);
+        expect(userRepositoryMock.delete).toHaveBeenCalledWith(userMock().id);
       });
 
       test('then it should return a resolved promise with the value "ok"', () => {
@@ -115,7 +115,25 @@ describe('UsersService', () => {
 
   describe('update', () => {
     describe('when update is called', () => {
-      const updateSpy = jest.spyOn(userRepositoryMock, 'delete');
+      const updateUserDto = { password: userMock().password };
+      let user: User | null;
+
+      beforeEach(async () => {
+        user = await service.update(userMock().id, updateUserDto);
+      });
+
+      test('then it should return the user', () => {
+        expect(userRepositoryMock.findOne).toHaveBeenCalledWith({
+          where: { id: userMock().id },
+        });
+      });
+
+      test('then it should call the repository update', () => {
+        expect(userRepositoryMock.update).toHaveBeenCalledWith(
+          userMock().id,
+          updateUserDto,
+        );
+      });
     });
   });
 });

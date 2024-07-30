@@ -24,10 +24,10 @@ export class UsersService {
   async findOne(id: string) {
     return await this.userRepository.findOne({ where: { id } });
   }
-
-  //   update(id: number, updateUserDto: UpdateUserDto) {
-  //     return `This action updates a #${id} user`;
-  //   }
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    await this.userRepository.update(id, updateUserDto);
+    return await this.userRepository.findOne({ where: { id } });
+  }
 
   async remove(id: string) {
     return await this.userRepository.delete(id);
