@@ -2,17 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
+import { userMock } from './utils/user.mock';
+import { userRepositoryMock } from './utils/userRepository.mock';
 import { CreateUserDto } from './dto/create-user.dto';
 
 describe('UsersService', () => {
   let service: UsersService;
-
-  const mockUserRepository = {
-    find: jest.fn(),
-    findOne: jest.fn(),
-    create: jest.fn(),
-    save: jest.fn(),
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -20,7 +15,7 @@ describe('UsersService', () => {
         UsersService,
         {
           provide: getRepositoryToken(User),
-          useValue: mockUserRepository,
+          useValue: userRepositoryMock,
         },
       ],
     }).compile();
@@ -31,6 +26,96 @@ describe('UsersService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
-  //just keep a random generator for a user for each test
-  // and KISS. test on success and 1 boundary
+
+  describe('findAll', () => {
+    describe('when findAll is called', () => {
+      let users: User[];
+
+      beforeEach(async () => {
+        users = await service.findAll();
+      });
+
+      test('then it should call userRepository', () => {
+        expect(userRepositoryMock.find).toHaveBeenCalled();
+      });
+
+      test('then it should return users', () => {
+        expect(users).toEqual([userMock()]);
+      });
+    });
+  });
+
+  describe('findOnde', () => {
+    describe('when findOne is called', () => {
+      let user: User | null;
+
+      beforeEach(async () => {
+        user = await service.findOne(userMock().id);
+      });
+
+      test('then it should return a user', async () => {
+        expect(user).toEqual(userMock());
+      });
+
+      test('then it should call the repository with the correct argument', () => {
+        expect(userRepositoryMock.findOne).toHaveBeenCalledWith({
+          where: { id: userMock().id },
+        });
+      });
+    });
+  });
+
+  describe('create', () => {
+    describe('when create is called', () => {
+      let user: User;
+
+      const createUserDto = new CreateUserDto(
+        userMock().email,
+        userMock().password,
+      );
+
+      beforeEach(async () => {
+        user = await service.create(createUserDto);
+      });
+
+      test('then it should return the created user', () => {
+        expect(user).toEqual(userMock());
+      });
+
+      test('then an entity instance should have been created', () => {
+        expect(userRepositoryMock.create).toHaveBeenCalledWith(createUserDto);
+      });
+
+      test('then it should save the created user', async () => {
+        expect(userRepositoryMock.save).toHaveBeenCalledWith(userMock());
+      });
+    });
+  });
+
+  describe('remove', () => {
+    describe('when remove is called', () => {
+      let response: any;
+      const removeSpy = jest
+        .spyOn(userRepositoryMock, 'delete')
+        .mockResolvedValue('ok');
+
+      beforeEach(async () => {
+        response = await service.remove(userMock().id);
+      });
+
+      test('then it should call delete with the id', () => {
+        expect(removeSpy).toHaveBeenCalledWith(userMock().id);
+      });
+
+      test('then it should return a resolved promise with the value "ok"', () => {
+        expect(response).toBe('ok');
+      });
+    });
+  });
+
+  describe('update', () => {
+    describe('when update is called', () => {
+      const updateSpy = jest.spyOn(userRepositoryMock, 'delete');
+    });
+  });
 });

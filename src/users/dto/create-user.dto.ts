@@ -5,6 +5,7 @@ export class CreateUserDto {
     this.email = email;
     this.password = password;
   }
+
   @IsEmail()
   email: string;
 
