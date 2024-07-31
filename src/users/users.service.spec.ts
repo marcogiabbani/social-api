@@ -123,6 +123,7 @@ describe('UsersService', () => {
       });
 
       test('then it should return the user', () => {
+        expect(user).toBeDefined();
         expect(userRepositoryMock.findOne).toHaveBeenCalledWith({
           where: { id: userMock().id },
         });
