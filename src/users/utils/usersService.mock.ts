@@ -1,4 +1,4 @@
-import { userMock } from './user.mock';
+import { userMock } from './userEntity.mock';
 
 export const usersServiceMock = {
   findOne: jest.fn().mockResolvedValue(userMock()),
