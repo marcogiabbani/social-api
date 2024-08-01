@@ -16,29 +16,28 @@ import { User } from './entities/user.entity';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  //   @Post()
-  //   create(@Body() createUserDto: CreateUserDto) {
-  //     return this.usersService.create(createUserDto);
-  //   }
+  @Post()
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
+  }
 
   @Get()
   async findAll(): Promise<User[]> {
-    const allUsers = await this.usersService.findAll();
-    return allUsers;
+    return await this.usersService.findAll();
   }
 
-  //   @Get(':id')
-  //   async findOne(@Param('id') id: string) {
-  //     return this.usersService.findOne(id);
-  //   }
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.usersService.findOne(id);
+  }
 
-  //   @Patch(':id')
-  //   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //     return this.usersService.update(+id, updateUserDto);
-  //   }
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(id, updateUserDto);
+  }
 
-  //   @Delete(':id')
-  //   remove(@Param('id') id: string) {
-  //     return this.usersService.remove(+id);
-  //   }
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.usersService.remove(id);
+  }
 }

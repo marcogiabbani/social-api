@@ -5,4 +5,5 @@ export const usersServiceMock = {
   findAll: jest.fn().mockResolvedValue([userMock()]),
   create: jest.fn().mockResolvedValue(userMock()),
   update: jest.fn().mockResolvedValue(userMock()),
+  remove: jest.fn().mockResolvedValue('ok'),
 };
