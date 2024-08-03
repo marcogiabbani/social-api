@@ -29,7 +29,7 @@ describe('UsersController (e2e)', () => {
   describe('/users (GET)', () => {
     test('should get an empty array if no users are in the db', async () => {
       const response = await request(app.getHttpServer()).get('/users');
-      expect(response.body).toBe([]);
+      expect(response.body).toEqual([]);
     });
   });
 });

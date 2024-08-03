@@ -10,6 +10,7 @@ import * as Joi from 'joi';
 @Module({
   imports: [
     ConfigModule.forRoot({
+      envFilePath: `.env.${process.env.NODE_ENV}`,
       validationSchema: Joi.object({
         POSTGRES_USER: Joi.string().required(),
         POSTGRES_PASSWORD: Joi.string().required(),
@@ -18,7 +19,6 @@ import * as Joi from 'joi';
         PGADMIN_EMAIL: Joi.string().required(),
         PGADMIN_PASSWORD: Joi.string().required(),
 
-        NODE_ENV: Joi.string(),
         PORT: Joi.number(),
       }),
     }),
