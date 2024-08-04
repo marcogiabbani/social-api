@@ -5,6 +5,7 @@ import { User } from './entities/user.entity';
 import { userMock } from './utils/userEntity.mock';
 import { userRepositoryMock } from './utils/userRepository.mock';
 import { CreateUserDto } from './dto/create-user.dto';
+import { Logger } from '@nestjs/common';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -17,6 +18,7 @@ describe('UsersService', () => {
           provide: getRepositoryToken(User),
           useValue: userRepositoryMock,
         },
+        Logger,
       ],
     }).compile();
 
