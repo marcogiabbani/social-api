@@ -30,4 +30,14 @@ export class AuthenticationService {
       );
     }
   }
+
+  async getAuthenticatedUser(email: string, password: string) {
+    const user = await this.usersService.findByEmail(email);
+    const passwordMatches = await bcrypt.compare(user.password, password);
+    if (passwordMatches) {
+      user.password = '';
+      return user;
+    }
+    return 'wrong credentials';
+  }
 }
