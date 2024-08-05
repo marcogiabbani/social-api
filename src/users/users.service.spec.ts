@@ -5,7 +5,7 @@ import { User } from './entities/user.entity';
 import { userMock } from './utils/userEntity.mock';
 import { userRepositoryMock } from './utils/userRepository.mock';
 import { CreateUserDto } from './dto/create-user.dto';
-import { Logger } from '@nestjs/common';
+import { Logger, HttpException, HttpStatus } from '@nestjs/common';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -63,6 +63,39 @@ describe('UsersService', () => {
         expect(userRepositoryMock.findOne).toHaveBeenCalledWith({
           where: { id: userMock().id },
         });
+      });
+    });
+  });
+
+  describe('findByEmail', () => {
+    describe('when findByEmail is called', () => {
+      let user: User | null;
+
+      beforeEach(async () => {
+        user = await service.findByEmail(userMock().email);
+      });
+
+      test('then it should return the user', () => {
+        expect(user).toEqual(userMock());
+      });
+
+      test('then it should call the repository with an email', () => {
+        expect(userRepositoryMock.findOne).toHaveBeenCalledWith({
+          where: { email: userMock().email },
+        });
+      });
+
+      test('if no userEmail exists the it should warn the user', async () => {
+        jest.spyOn(userRepositoryMock, 'findOne').mockResolvedValue(null);
+
+        await expect(
+          service.findByEmail('unexisting@email.com'),
+        ).rejects.toEqual(
+          new HttpException(
+            'User with this email does not exist',
+            HttpStatus.NOT_FOUND,
+          ),
+        );
       });
     });
   });

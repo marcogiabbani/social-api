@@ -27,7 +27,7 @@ export class User {
   })
   updatedAt!: Date;
 
-  @Column()
+  @Column({ unique: true })
   public email: string;
 
   @Column()
