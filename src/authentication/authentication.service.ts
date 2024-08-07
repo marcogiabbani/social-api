@@ -32,12 +32,24 @@ export class AuthenticationService {
   }
 
   async getAuthenticatedUser(email: string, password: string) {
-    const user = await this.usersService.findByEmail(email);
-    const passwordMatches = await bcrypt.compare(user.password, password);
-    if (passwordMatches) {
-      user.password = '';
-      return user;
+    try {
+      const user = await this.usersService.findByEmail(email);
+      const passwordMatches = await bcrypt.compare(user.password, password);
+      if (!passwordMatches) {
+        throw new HttpException(
+          'Wrong credentials provided',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      return {
+        ...user,
+        password: '',
+      };
+    } catch (error) {
+      throw new HttpException(
+        'Wrong credentials provided',
+        HttpStatus.BAD_REQUEST,
+      );
     }
-    return 'wrong credentials';
   }
 }

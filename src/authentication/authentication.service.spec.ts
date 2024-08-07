@@ -7,26 +7,9 @@ import { User } from '../../src/users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { PostgresErrorCode } from '../database/pgErrorCodes.enum';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { RegisterUserDto } from './dto/register-user.dto';
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
-  let registerUserDto: RegisterUserDto;
-  let hashedPassword: string;
-  let hashedRegisterUserDto: RegisterUserDto;
-  const SALT_ROUNDS: number = 10;
-
-  beforeAll(async () => {
-    hashedPassword = await bcrypt.hash(userMock().password, 10);
-    hashedRegisterUserDto = {
-      email: userMock().email,
-      password: hashedPassword,
-    };
-    jest.spyOn(bcrypt, 'hash').mockImplementation(async () => hashedPassword);
-    jest
-      .spyOn(usersServiceMock, 'findByEmail')
-      .mockResolvedValue({ ...userMock(), password: hashedPassword });
-  });
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -37,10 +20,6 @@ describe('AuthenticationService', () => {
       .compile();
 
     service = module.get<AuthenticationService>(AuthenticationService);
-    registerUserDto = {
-      email: userMock().email,
-      password: userMock().password,
-    };
   });
 
   it('should be defined', () => {
@@ -49,14 +28,25 @@ describe('AuthenticationService', () => {
 
   describe('register', () => {
     describe('when register is called', () => {
-      let createdUser: User;
+      test('then bcrypt should hash the password', async () => {
+        //arrange
+        const registerUserDto = {
+          email: userMock().email,
+          password: userMock().password,
+        };
+        const SALT_ROUNDS: number = 10;
+        const hashedPassword = await bcrypt.hash(
+          userMock().password,
+          SALT_ROUNDS,
+        );
+        jest
+          .spyOn(bcrypt, 'hash')
+          .mockImplementationOnce(async () => hashedPassword);
 
-      beforeEach(async () => {
-        jest.spyOn(usersServiceMock, 'create').mockResolvedValue(userMock());
-        createdUser = await service.register(registerUserDto);
-      });
+        //act
+        await service.register(registerUserDto);
 
-      test('then the password should be hashed', () => {
+        //assert
         expect(bcrypt.hash).toHaveBeenCalledWith(
           registerUserDto.password,
           SALT_ROUNDS,
@@ -64,89 +54,221 @@ describe('AuthenticationService', () => {
       });
 
       test('then the user service should receive a user with hashed password', async () => {
-        expect(usersServiceMock.create).toHaveBeenCalledWith(
-          hashedRegisterUserDto,
+        //arrange
+        const registerUserDto = {
+          email: userMock().email,
+          password: userMock().password,
+        };
+        const SALT_ROUNDS: number = 10;
+        const hashedPassword = await bcrypt.hash(
+          userMock().password,
+          SALT_ROUNDS,
         );
+
+        jest
+          .spyOn(bcrypt, 'hash')
+          .mockImplementationOnce(async () => hashedPassword);
+
+        //act
+        await service.register(registerUserDto);
+
+        //assert
+        expect(usersServiceMock.create).toHaveBeenCalledWith({
+          email: userMock().email,
+          password: hashedPassword,
+        });
       });
 
       test('then the returned user should have an empty string as password', async () => {
+        //arrange
+        const registerUserDto = {
+          email: userMock().email,
+          password: userMock().password,
+        };
+
+        //act
+        const createdUser = await service.register(registerUserDto);
+
+        //assert
         expect(createdUser.password).toBe('');
       });
     });
 
     describe('when user already exists', () => {
-      beforeEach(async () => {
+      test('then it should throw a new HTTP exception with BAD Request status', async () => {
+        //arrange
+        const registerUserDto = {
+          email: userMock().email,
+          password: userMock().password,
+        };
         jest
           .spyOn(usersServiceMock, 'create')
-          .mockRejectedValue({ code: PostgresErrorCode.UniqueViolation });
-      });
+          .mockRejectedValueOnce({ code: PostgresErrorCode.UniqueViolation });
 
-      test('then it should throw a new HTTP exception with BAD Request status', async () => {
-        await expect(service.register(registerUserDto)).rejects.toThrow(
-          new HttpException(
+        try {
+          //act
+          await service.register(registerUserDto);
+        } catch (error) {
+          //assert
+          expect(error).toBeInstanceOf(HttpException);
+          expect(error).toHaveProperty('status', HttpStatus.BAD_REQUEST);
+          expect(error).toHaveProperty(
+            'message',
             'User with that email already exists',
-            HttpStatus.BAD_REQUEST,
-          ),
-        );
+          );
+        }
       });
     });
 
     describe('when an unspecified error occurs', () => {
-      beforeEach(async () => {
+      test('then a server error should be thrown', async () => {
+        //arrange
+        const registerUserDto = {
+          email: userMock().email,
+          password: userMock().password,
+        };
         jest
           .spyOn(usersServiceMock, 'create')
-          .mockRejectedValue(new Error('Unspecified error'));
-      });
+          .mockRejectedValueOnce(new Error('Unspecified error'));
 
-      test('then a server error should be thrown', async () => {
-        await expect(service.register(registerUserDto)).rejects.toThrow(
-          new HttpException(
-            'Something went wrong',
+        try {
+          //act
+          await service.register(registerUserDto);
+        } catch (error) {
+          //assert
+          expect(error).toBeInstanceOf(HttpException);
+          expect(error).toHaveProperty(
+            'status',
             HttpStatus.INTERNAL_SERVER_ERROR,
-          ),
-        );
+          );
+          expect(error).toHaveProperty('message', 'Something went wrong');
+        }
       });
     });
   });
 
   describe('getAuthenticatedUser', () => {
-    const userCredentials = {
-      email: userMock().email,
-      password: userMock().password,
-    };
+    describe('when getAuthenticatedUser called', () => {
+      test('then it should first call users service findByEmail', async () => {
+        //arrange
+        const userCredentials = {
+          email: userMock().email,
+          password: userMock().password,
+        };
+        jest
+          .spyOn(usersServiceMock, 'findByEmail')
+          .mockReturnValueOnce(userMock());
+        jest
+          .spyOn(bcrypt, 'compare')
+          .mockImplementationOnce(() => Promise.resolve(true));
 
-    const authenticatedUser = { ...userMock(), password: '' };
-    let user: any;
-
-    describe('when called', () => {
-      beforeEach(async () => {
-        jest.spyOn(bcrypt, 'compare').mockImplementation(async () => true);
-
-        user = await service.getAuthenticatedUser(
+        //act
+        await service.getAuthenticatedUser(
           userCredentials.email,
           userCredentials.password,
         );
-      });
-      test('then it should search the user by email', () => {
+        //assert
         expect(usersServiceMock.findByEmail).toHaveBeenCalledWith(
           userCredentials.email,
         );
       });
 
-      test('then should compare the received password with the stored hashed one', () => {
+      test('if no user is found, then it should throw an exception', async () => {
+        //arrange
+        const userCredentials = {
+          email: userMock().email,
+          password: userMock().password,
+        };
+        jest
+          .spyOn(usersServiceMock, 'findByEmail')
+          .mockImplementationOnce(() => {
+            throw new HttpException(
+              'User with this email does not exist',
+              HttpStatus.NOT_FOUND,
+            );
+          });
+        try {
+          //act
+          await service.getAuthenticatedUser(
+            'fake@email.com',
+            userCredentials.password,
+          );
+        } catch (error) {
+          //assert
+          expect(error).toBeInstanceOf(HttpException);
+          expect(error).toHaveProperty('status', HttpStatus.BAD_REQUEST);
+          expect(error).toHaveProperty('message', 'Wrong credentials provided');
+        }
+      });
+
+      test('then it should validate the password', async () => {
+        //arrange
+        const userCredentials = {
+          email: userMock().email,
+          password: userMock().password,
+        };
+        const SALT_ROUNDS: number = 10;
+        const hashedPassword = await bcrypt.hash(
+          userMock().password,
+          SALT_ROUNDS,
+        );
+        jest
+          .spyOn(usersServiceMock, 'findByEmail')
+          .mockResolvedValueOnce({ ...userMock(), password: hashedPassword });
+        jest.spyOn(bcrypt, 'compare').mockImplementationOnce(async () => true);
+
+        //act
+        await service.getAuthenticatedUser(
+          userCredentials.email,
+          userCredentials.password,
+        );
+
+        //assert
         expect(bcrypt.compare).toHaveBeenCalledWith(
-          user.password,
+          hashedPassword,
           userCredentials.password,
         );
       });
 
-      test('then it should return a user with empty password if credentials are valid', () => {
-        expect(user).toEqual(authenticatedUser);
-      });
-    });
+      test('then it should return the user with no password', async () => {
+        //arrange
+        const userCredentials = {
+          email: userMock().email,
+          password: userMock().password,
+        };
+        const expected = { ...userMock(), password: '' };
+        jest.spyOn(bcrypt, 'compare').mockImplementationOnce(async () => true);
 
-    describe('when wrong credentials are provided', () => {
-      ///WIP
+        //act
+        const sut = await service.getAuthenticatedUser(
+          userCredentials.email,
+          userCredentials.password,
+        );
+
+        //assert
+        expect(sut).toEqual(expected);
+      });
+
+      test('if passwords do not match it should throw an exception', async () => {
+        //arrange
+        const userCredentials = {
+          email: userMock().email,
+          password: userMock().password,
+        };
+        jest.spyOn(bcrypt, 'compare').mockImplementationOnce(async () => false);
+
+        try {
+          //act
+          await service.getAuthenticatedUser(
+            userCredentials.email,
+            'wrongPassword',
+          );
+        } catch (error) {
+          expect(error).toBeInstanceOf(HttpException);
+          expect(error).toHaveProperty('status', HttpStatus.BAD_REQUEST);
+          expect(error).toHaveProperty('message', 'Wrong credentials provided');
+        }
+      });
     });
   });
 });
