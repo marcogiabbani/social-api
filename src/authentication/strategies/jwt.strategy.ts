@@ -23,9 +23,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: TokenPayload) {
-    //WIP should throw a NOT FOUND from the users service and
-    //since the behaviour of the function changed, i should
-    //update the tests accordingly
     return this.userService.findOne(payload.userId);
   }
 }
