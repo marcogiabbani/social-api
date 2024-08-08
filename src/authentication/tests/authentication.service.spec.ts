@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthenticationService } from './authentication.service';
-import { UsersService } from '../../src/users/users.service';
-import { usersServiceMock } from '../../src/users/utils/usersService.mock';
-import { userMock } from '../../src/users/utils/userEntity.mock';
+import { AuthenticationService } from '../authentication.service';
+import { UsersService } from '../../users/users.service';
+import { usersServiceMock } from '../../users/utils/usersService.mock';
+import { userMock } from '../../users/utils/userEntity.mock';
 import * as bcrypt from 'bcrypt';
-import { PostgresErrorCode } from '../database/pgErrorCodes.enum';
+import { PostgresErrorCode } from '../../database/pgErrorCodes.enum';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 describe('AuthenticationService', () => {
