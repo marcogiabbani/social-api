@@ -47,22 +47,32 @@ describe('UsersService', () => {
     });
   });
 
-  describe('findOnde', () => {
+  describe('findOne', () => {
     describe('when findOne is called', () => {
       let user: User | null;
 
-      beforeEach(async () => {
-        user = await service.findOne(userMock().id);
-      });
-
       test('then it should return a user', async () => {
+        user = await service.findOne(userMock().id);
         expect(user).toEqual(userMock());
       });
 
-      test('then it should call the repository with the correct argument', () => {
+      test('then it should call the repository with the correct argument', async () => {
+        user = await service.findOne(userMock().id);
         expect(userRepositoryMock.findOne).toHaveBeenCalledWith({
           where: { id: userMock().id },
         });
+      });
+
+      test('if no user is found it should throw a not found exception', async () => {
+        try {
+          jest.spyOn(userRepositoryMock, 'findOne').mockResolvedValueOnce(null);
+          const user = await service.findOne(userMock().id);
+          console.log('user', user);
+        } catch (error) {
+          expect(error).toBeInstanceOf(HttpException);
+          expect(error).toHaveProperty('message', 'User does not exist');
+          expect(error).toHaveProperty('status', HttpStatus.NOT_FOUND);
+        }
       });
     });
   });
