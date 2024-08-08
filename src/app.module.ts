@@ -21,6 +21,9 @@ import * as Joi from 'joi';
         PGADMIN_PASSWORD: Joi.string().required(),
 
         PORT: Joi.number(),
+
+        JWT_SECRET: Joi.string().required(),
+        JWT_EXPIRATION_TIME: Joi.string().required(),
       }),
     }),
     DatabaseModule,
