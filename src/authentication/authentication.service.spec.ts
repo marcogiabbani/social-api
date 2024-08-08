@@ -200,6 +200,36 @@ describe('AuthenticationService', () => {
         }
       });
 
+      test('then it should call verifyPassword', async () => {
+        //arrange
+        const userCredentials = {
+          email: userMock().email,
+          password: userMock().password,
+        };
+        const SALT_ROUNDS: number = 10;
+        const hashedPassword = await bcrypt.hash(
+          userMock().password,
+          SALT_ROUNDS,
+        );
+        jest
+          .spyOn(usersServiceMock, 'findByEmail')
+          .mockResolvedValueOnce({ ...userMock(), password: hashedPassword });
+        jest.spyOn(bcrypt, 'compare').mockImplementationOnce(async () => true);
+        jest.spyOn(service, 'verifyPassword').mockResolvedValue();
+
+        //act
+        await service.getAuthenticatedUser(
+          userCredentials.email,
+          userCredentials.password,
+        );
+
+        //assert
+        expect(service.verifyPassword).toHaveBeenCalledWith(
+          userCredentials.password,
+          hashedPassword,
+        );
+      });
+
       test('then it should validate the password', async () => {
         //arrange
         const userCredentials = {
