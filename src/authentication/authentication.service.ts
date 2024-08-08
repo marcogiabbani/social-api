@@ -31,16 +31,23 @@ export class AuthenticationService {
     }
   }
 
+  async verifyPassword(
+    plainPassword: string,
+    hashedPassword: string,
+  ): Promise<void> {
+    const passwordMatches = await bcrypt.compare(plainPassword, hashedPassword);
+    if (!passwordMatches) {
+      throw new HttpException(
+        'Wrong credentials provided',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
   async getAuthenticatedUser(email: string, password: string) {
     try {
       const user = await this.usersService.findByEmail(email);
-      const passwordMatches = await bcrypt.compare(user.password, password);
-      if (!passwordMatches) {
-        throw new HttpException(
-          'Wrong credentials provided',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
+      await this.verifyPassword(password, user.password);
       return {
         ...user,
         password: '',

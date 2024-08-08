@@ -3,7 +3,6 @@ import { AuthenticationService } from './authentication.service';
 import { UsersService } from '../../src/users/users.service';
 import { usersServiceMock } from '../../src/users/utils/usersService.mock';
 import { userMock } from '../../src/users/utils/userEntity.mock';
-import { User } from '../../src/users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { PostgresErrorCode } from '../database/pgErrorCodes.enum';
 import { HttpException, HttpStatus } from '@nestjs/common';
@@ -225,8 +224,8 @@ describe('AuthenticationService', () => {
 
         //assert
         expect(bcrypt.compare).toHaveBeenCalledWith(
-          hashedPassword,
           userCredentials.password,
+          hashedPassword,
         );
       });
 
