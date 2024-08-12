@@ -2,6 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthenticationService } from '../authentication.service';
 import { UsersService } from '../../users/users.service';
 import { usersServiceMock } from '../../users/utils/usersService.mock';
+import { JwtService } from '@nestjs/jwt';
+import { JwtServiceMock } from '../utils/jwt.service.mock';
+import { ConfigService } from '@nestjs/config';
+import { ConfigServiceMock } from '../utils/config.service.mock';
 import { userMock } from '../../users/utils/userEntity.mock';
 import * as bcrypt from 'bcrypt';
 import { PostgresErrorCode } from '../../database/pgErrorCodes.enum';
@@ -11,18 +15,33 @@ describe('AuthenticationService', () => {
   let service: AuthenticationService;
 
   beforeEach(async () => {
+    // const module: TestingModule = await Test.createTestingModule({
+    //   providers: [AuthenticationService, UsersService],
+    // })
+    //   .overrideProvider(UsersService)
+    //   .useValue(usersServiceMock)
+    //   .compile();
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthenticationService, UsersService],
+      providers: [
+        AuthenticationService,
+        UsersService,
+        JwtService,
+        ConfigService,
+      ],
     })
       .overrideProvider(UsersService)
       .useValue(usersServiceMock)
+      .overrideProvider(JwtService)
+      .useValue(JwtServiceMock)
+      .overrideProvider(ConfigService)
+      .useValue(ConfigServiceMock)
       .compile();
-
     service = module.get<AuthenticationService>(AuthenticationService);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+    expect(usersServiceMock).toBeDefined();
   });
 
   describe('register', () => {
@@ -297,6 +316,44 @@ describe('AuthenticationService', () => {
           expect(error).toHaveProperty('status', HttpStatus.BAD_REQUEST);
           expect(error).toHaveProperty('message', 'Wrong credentials provided');
         }
+      });
+    });
+  });
+
+  describe('getCookieWithJwtToken', () => {
+    /**
+     * 1. firmar el payload (llamando jwt service)
+     * 2. devolver un string con la forma de cookie
+     */
+    describe('when getCookieWithJwtToken is called', () => {
+      test('then it should sign the id received', async () => {
+        //arrange
+        const payload = 'UUID-4EXAMPLE';
+        const expected = 'eySomeExampleToken';
+        jest.spyOn(JwtServiceMock, 'sign').mockReturnValueOnce(expected);
+
+        //act
+        const sut = JwtServiceMock.sign(payload);
+
+        //assert
+        expect(JwtServiceMock.sign).toHaveBeenCalledWith(payload);
+        expect(sut).toBe(expected);
+      });
+
+      test('then it should return a cookie string with the tocken and configuration max age', async () => {
+        //arrange
+        const userId = 'UUID-4EXAMPLE';
+        const token = 'eySomeExampleToken';
+        const JWT_EXPIRATION_TIME = '3600';
+        jest.spyOn(JwtServiceMock, 'sign').mockReturnValueOnce(token);
+        jest.spyOn(ConfigServiceMock, 'get').mockReturnValueOnce('3600');
+        const expected = `Authentication=${token}; HttpOnly; Path=/; Max-Age=${JWT_EXPIRATION_TIME}`;
+
+        //act
+        const sut = service.getCookieWithJwtToken(userId);
+
+        //assert
+        expect(sut).toBe(expected);
       });
     });
   });
