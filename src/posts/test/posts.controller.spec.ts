@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PostsController } from './posts.controller';
-import { PostsService } from './posts.service';
+import { PostsController } from '../posts.controller';
+import { PostsService } from '../posts.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Post } from './entities/post.entity';
+import { Post } from '../entities/post.entity';
 import { Repository } from 'typeorm';
 
 const mockPostRepository = {
@@ -10,7 +10,6 @@ const mockPostRepository = {
   findOne: jest.fn(),
   create: jest.fn(),
   save: jest.fn(),
-  // add more methods as needed
 };
 
 describe('PostsController', () => {

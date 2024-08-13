@@ -3,7 +3,7 @@ import { AuthenticationController } from '../authentication.controller';
 import { AuthenticationService } from '../authentication.service';
 import RequestWithUser from '../interfaces/requestWithUser.interface';
 import { userMock } from '../../users/utils/userEntity.mock';
-import { LocalAuthenticationGuard } from '../localAuthentication.guard';
+import { LocalAuthenticationGuard } from '../local-authentication.guard';
 import { ExecutionContext } from '@nestjs/common';
 import { Response } from 'express';
 
