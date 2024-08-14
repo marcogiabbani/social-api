@@ -22,7 +22,7 @@ export class AuthenticationService {
         ...registerUserDto,
         password: hashedPassword,
       });
-      createdUser.password = '';
+      //   createdUser.password = '';
       return createdUser;
     } catch (error: any) {
       if (error?.code === PostgresErrorCode.UniqueViolation) {
@@ -55,10 +55,7 @@ export class AuthenticationService {
     try {
       const user = await this.usersService.findByEmail(email);
       await this.verifyPassword(password, user.password);
-      return {
-        ...user,
-        password: '',
-      };
+      return user;
     } catch (error) {
       throw new HttpException(
         'Wrong credentials provided',

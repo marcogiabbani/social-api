@@ -1,4 +1,4 @@
-import { Request } from '@nestjs/common';
+import { Request } from 'express';
 import { User } from '../../users/entities/user.entity';
 
 interface RequestWithUser extends Request {

@@ -15,12 +15,6 @@ describe('AuthenticationService', () => {
   let service: AuthenticationService;
 
   beforeEach(async () => {
-    // const module: TestingModule = await Test.createTestingModule({
-    //   providers: [AuthenticationService, UsersService],
-    // })
-    //   .overrideProvider(UsersService)
-    //   .useValue(usersServiceMock)
-    //   .compile();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthenticationService,
@@ -97,7 +91,8 @@ describe('AuthenticationService', () => {
         });
       });
 
-      test('then the returned user should have an empty string as password', async () => {
+      //interceptor prevents sending the password field in aut controller now
+      xtest('then the returned user should have an empty string as password', async () => {
         //arrange
         const registerUserDto = {
           email: userMock().email,
@@ -278,7 +273,8 @@ describe('AuthenticationService', () => {
         );
       });
 
-      test('then it should return the user with no password', async () => {
+      //interceptor prevents sending the password field in aut controller now
+      xtest('then it should return the user with no password', async () => {
         //arrange
         const userCredentials = {
           email: userMock().email,
@@ -321,10 +317,6 @@ describe('AuthenticationService', () => {
   });
 
   describe('getCookieWithJwtToken', () => {
-    /**
-     * 1. firmar el payload (llamando jwt service)
-     * 2. devolver un string con la forma de cookie
-     */
     describe('when getCookieWithJwtToken is called', () => {
       test('then it should sign the id received', async () => {
         //arrange

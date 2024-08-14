@@ -63,17 +63,23 @@ describe('AuthenticationController', () => {
 
   describe('login', () => {
     describe('when login is called', () => {
-      test('then it should log in the user and set a cookie', async () => {
+      it('should log in the user and set a cookie', async () => {
         //arrange
         const jwtMock = 'eyFakeJWT';
         authenticationServiceMock.getCookieWithJwtToken.mockReturnValue(
           `Authentication=eyFakeJWT; HttpOnly; Path=/`,
         );
+        //extends requestMock to include the response
+        const requestWithResponseMock = {
+          ...requestMock,
+          res: responseMock,
+        } as RequestWithUser;
 
         //act
-        await controller.logIn(requestMock as RequestWithUser, responseMock);
+        const result = await controller.logIn(requestWithResponseMock);
 
-        //assert
+        //expect
+
         expect(
           authenticationServiceMock.getCookieWithJwtToken,
         ).toHaveBeenCalledWith(requestMock.user.id);
@@ -81,10 +87,7 @@ describe('AuthenticationController', () => {
           'Set-Cookie',
           `Authentication=${jwtMock}; HttpOnly; Path=/`,
         );
-        expect(responseMock.send).toHaveBeenCalledWith({
-          ...requestMock.user,
-          password: '',
-        });
+        expect(result).toEqual(requestMock.user);
       });
     });
   });
