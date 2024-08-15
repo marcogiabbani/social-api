@@ -22,7 +22,6 @@ export class AuthenticationService {
         ...registerUserDto,
         password: hashedPassword,
       });
-      //   createdUser.password = '';
       return createdUser;
     } catch (error: any) {
       if (error?.code === PostgresErrorCode.UniqueViolation) {
