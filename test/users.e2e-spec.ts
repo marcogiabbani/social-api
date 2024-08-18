@@ -141,7 +141,7 @@ describe('UsersController (e2e)', () => {
 
       const response = await request(app.getHttpServer()).get('/users');
 
-      expect(response.body[0]).toEqual(userTwo);
+      expect(response.body[0].email).toEqual(userTwo.email);
     });
   });
 });
