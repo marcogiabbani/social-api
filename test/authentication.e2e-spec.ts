@@ -32,6 +32,8 @@ describe('AuthenticationController (e2e)', () => {
     app.useGlobalPipes(new ValidationPipe());
 
     await app.init();
+
+    await userRepository.clear();
   });
 
   afterEach(async () => {
@@ -178,7 +180,7 @@ describe('AuthenticationController (e2e)', () => {
         .send(user)
         .expect(201);
 
-      await request(app.getHttpServer())
+      const loggedUser = await request(app.getHttpServer())
         .post('/authentication/log-in')
         .send(user)
         .expect(200);
@@ -187,18 +189,19 @@ describe('AuthenticationController (e2e)', () => {
       const sut = await request(app.getHttpServer())
         .post('/authentication/log-out')
         .send(user)
+        .set('Cookie', `${loggedUser.headers['set-cookie']}`)
         .expect(200);
 
       //assert
       expect(sut.headers['set-cookie']).toBeDefined();
       const cookie = cookieExtractor(sut.headers['set-cookie']);
       expect(cookie.HttpOnly).toBeTruthy();
-      console.log(cookie);
-
-      //   expect(cookie.Authentication).toBe();
-      //   const decodedJwt = jwt.decode(cookie.Authentication) as jwt.JwtPayload;
-      //   expect(decodedJwt).toBeDefined();
-      //   expect(decodedJwt.userId).toEqual(sut.body.id);
+      expect(cookie).toEqual({
+        Authentication: '',
+        HttpOnly: true,
+        Path: '/',
+        'Max-Age': '0',
+      });
     });
   });
 });

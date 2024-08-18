@@ -14,6 +14,7 @@ describe('AuthenticationController', () => {
     register: jest.fn(),
     getAuthenticatedUser: jest.fn(),
     getCookieWithJwtToken: jest.fn(),
+    getCookieForLogOut: jest.fn(),
   };
 
   const requestMock = {
@@ -66,7 +67,7 @@ describe('AuthenticationController', () => {
       it('should log in the user and set a cookie', async () => {
         //arrange
         const jwtMock = 'eyFakeJWT';
-        authenticationServiceMock.getCookieWithJwtToken.mockReturnValue(
+        authenticationServiceMock.getCookieWithJwtToken.mockReturnValueOnce(
           `Authentication=eyFakeJWT; HttpOnly; Path=/`,
         );
         //extends requestMock to include the response
@@ -79,7 +80,6 @@ describe('AuthenticationController', () => {
         const result = await controller.logIn(requestWithResponseMock);
 
         //expect
-
         expect(
           authenticationServiceMock.getCookieWithJwtToken,
         ).toHaveBeenCalledWith(requestMock.user.id);
@@ -88,6 +88,31 @@ describe('AuthenticationController', () => {
           `Authentication=${jwtMock}; HttpOnly; Path=/`,
         );
         expect(result).toEqual(requestMock.user);
+      });
+    });
+
+    describe('log-out', () => {
+      it('should reset the cookie', async () => {
+        //arrange
+        const logOutCookie = 'Authentication=; HttpOnly; Path=/; Max-Age=0';
+        authenticationServiceMock.getCookieForLogOut.mockReturnValueOnce(
+          logOutCookie,
+        );
+        const requestWithResponseMock = {
+          ...requestMock,
+          res: responseMock,
+        } as RequestWithUser;
+
+        //act
+        const result = await controller.logOut(requestWithResponseMock);
+
+        //expect
+        expect(authenticationServiceMock.getCookieForLogOut).toHaveBeenCalled();
+        expect(responseMock.setHeader).toHaveBeenCalledWith(
+          'Set-Cookie',
+          logOutCookie,
+        );
+        expect(result).toBeUndefined();
       });
     });
   });
