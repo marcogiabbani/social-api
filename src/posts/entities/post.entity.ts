@@ -3,13 +3,17 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   CreateDateColumn,
+  ManyToOne,
 } from 'typeorm';
+
+import { User } from '../../users/entities/user.entity';
 
 @Entity()
 export class Post {
-  constructor(title: string, content: string) {
+  constructor(title: string, content: string, author: User) {
     this.title = title;
     this.content = content;
+    this.author = author;
   }
 
   @PrimaryGeneratedColumn('uuid')
@@ -32,4 +36,7 @@ export class Post {
 
   @Column()
   public content: string;
+
+  @ManyToOne(() => User, (author: User) => author.posts)
+  public author: User;
 }

@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PostsService } from '../posts.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Post } from '../entities/post.entity';
+import { userMock } from '../../users/utils/userEntity.mock';
 
 const mockPostRepository = {
   find: jest.fn(),
@@ -28,7 +29,7 @@ describe('PostsService', () => {
 
     service = module.get<PostsService>(PostsService);
     repository = module.get(getRepositoryToken(Post));
-    mockPost = new Post('Test Title', 'Test Content');
+    mockPost = new Post('Test Title', 'Test Content', userMock());
     mockPost.id = '1';
     mockPost.createdAt = new Date();
     mockPost.updatedAt = new Date();

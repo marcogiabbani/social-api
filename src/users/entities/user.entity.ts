@@ -1,18 +1,15 @@
-import { Exclude } from 'class-transformer';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
+import { Post } from '../../posts/entities/post.entity';
 
 @Entity()
 export class User {
-  constructor(email: string, password: string) {
-    this.email = email;
-    this.password = password;
-  }
-
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
@@ -34,4 +31,7 @@ export class User {
   @Column()
   @Exclude()
   public password: string;
+
+  @OneToMany(() => Post, (post: Post) => post.author)
+  public posts: Post[];
 }

@@ -7,5 +7,6 @@ export const userMock = (): User => {
     updatedAt: new Date('2022-01-01T00:00:00Z'),
     email: 'test@email.com',
     password: 'somepassword123',
+    posts: [],
   };
 };
