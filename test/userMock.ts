@@ -1,4 +1,4 @@
-export const userMock = {
-  email: 'test@email.com',
+export const userMock = () => ({
+  email: `${Date.now()}@email.com`,
   password: 'somePassword123',
-};
+});

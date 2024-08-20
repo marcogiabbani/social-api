@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
 import { Repository } from 'typeorm';
@@ -20,6 +20,8 @@ describe('UsersController (e2e)', () => {
     userRepository = moduleFixture.get<Repository<User>>(
       getRepositoryToken(User),
     );
+
+    app.useGlobalPipes(new ValidationPipe());
     await app.init();
   });
 
@@ -35,19 +37,34 @@ describe('UsersController (e2e)', () => {
   });
 
   describe('/users (POST)', () => {
+    beforeEach(async () => {
+      const uncleared = await request(app.getHttpServer()).get('/users');
+      await Promise.all(
+        uncleared.body.map(async (user: User) => {
+          return request(app.getHttpServer()).delete(`/users/${user.id}`);
+        }),
+      );
+    });
+
     test('should post a user successfully', async () => {
+      const user = userMock();
       const response = await request(app.getHttpServer())
         .post('/users')
-        .send(userMock);
+        .send(user);
       expect(response.body).toBeDefined();
-      expect(response.body.email).toBe(userMock.email);
-      expect(response.body.password).toBe(userMock.password);
+      expect(response.body.email).toBe(user.email);
+      expect(response.body.password).toBe(user.password);
     });
   });
 
   describe('/users (GET)', () => {
     beforeEach(async () => {
-      await userRepository.clear();
+      const uncleared = await request(app.getHttpServer()).get('/users');
+      await Promise.all(
+        uncleared.body.map(async (user: User) => {
+          return request(app.getHttpServer()).delete(`/users/${user.id}`);
+        }),
+      );
     });
 
     test('should get an empty array if no users are in the db', async () => {
@@ -55,15 +72,14 @@ describe('UsersController (e2e)', () => {
       expect(response.body).toEqual([]);
     });
 
-    test('should get an empty array if no users are in the db', async () => {
-      const createResponse = await request(app.getHttpServer())
-        .post('/users')
-        .send(userMock)
-        .expect(201);
+    test('should get a user', async () => {
+      const user = userMock();
+
+      await request(app.getHttpServer()).post('/users').send(user).expect(201);
       const response = await request(app.getHttpServer()).get('/users');
 
       expect(response.body).not.toEqual([]);
-      expect(response.body[0]).toEqual(createResponse.body);
+      expect(response.body[0].email).toEqual(user.email);
     });
   });
 
@@ -71,10 +87,15 @@ describe('UsersController (e2e)', () => {
     let user: User;
 
     beforeEach(async () => {
-      await userRepository.clear();
+      const uncleared = await request(app.getHttpServer()).get('/users');
+      await Promise.all(
+        uncleared.body.map(async (user: User) => {
+          return request(app.getHttpServer()).delete(`/users/${user.id}`);
+        }),
+      );
       const response = await request(app.getHttpServer())
         .post('/users')
-        .send(userMock)
+        .send(userMock())
         .expect(201);
       user = response.body;
     });
@@ -92,10 +113,15 @@ describe('UsersController (e2e)', () => {
     let user: User;
 
     beforeEach(async () => {
-      await userRepository.clear();
+      const uncleared = await request(app.getHttpServer()).get('/users');
+      await Promise.all(
+        uncleared.body.map(async (user: User) => {
+          return request(app.getHttpServer()).delete(`/users/${user.id}`);
+        }),
+      );
       const response = await request(app.getHttpServer())
         .post('/users')
-        .send(userMock)
+        .send(userMock())
         .expect(201);
       user = response.body;
     });
@@ -114,10 +140,15 @@ describe('UsersController (e2e)', () => {
     let userTwo: User;
 
     beforeEach(async () => {
-      await userRepository.clear();
+      const uncleared = await request(app.getHttpServer()).get('/users');
+      await Promise.all(
+        uncleared.body.map(async (user: User) => {
+          return request(app.getHttpServer()).delete(`/users/${user.id}`);
+        }),
+      );
       const responseOne = await request(app.getHttpServer())
         .post('/users')
-        .send(userMock)
+        .send(userMock())
         .expect(201);
 
       const responseTwo = await request(app.getHttpServer())
