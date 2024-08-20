@@ -32,8 +32,6 @@ describe('AuthenticationController (e2e)', () => {
     app.useGlobalPipes(new ValidationPipe());
 
     await app.init();
-
-    await userRepository.clear();
   });
 
   afterEach(async () => {
