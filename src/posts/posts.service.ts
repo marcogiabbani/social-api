@@ -27,4 +27,8 @@ export class PostsService {
   async findOne(id: string) {
     return await this.postRepository.findOneBy({ id: id });
   }
+
+  //deletebyId with auth
+  //update with auth
+  // check that the post belongs to the user?
 }
