@@ -50,7 +50,8 @@ describe('UsersController (e2e)', () => {
       const user = userMock();
       const response = await request(app.getHttpServer())
         .post('/users')
-        .send(user);
+        .send(user)
+        .expect(201);
       expect(response.body).toBeDefined();
       expect(response.body.email).toBe(user.email);
       expect(response.body.password).toBe(user.password);
