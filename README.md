@@ -22,6 +22,10 @@ This way the API remains agnostic of the type of GUI, delegating the use case to
 3. Unit test the controller CRUD.
 4. E2E tests of a user creating a post, restriction to a creation without auth, etc.
 
+> Pensando en la jerarquía de los módulos y la independencia de los mismos WIP
+Users <> Posts
+Categories <>
+
 ### Categories
 
 1. There is a many to many relationship to the posts.
@@ -30,3 +34,12 @@ This way the API remains agnostic of the type of GUI, delegating the use case to
 4. E2E the post creation with a category.
 5. E2E fetch by category
 6. E2E fetch posts with their corresponding category.
+
+### Photos
+
+Posts <-- Images
+
+### Artivles
+
+Posts <-- Articles
+Images <--
