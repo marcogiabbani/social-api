@@ -33,8 +33,7 @@ export class PostsService {
       where: { author: { id: userId } },
     });
   }
-
-  //findByCategory
-  //deletebyId with auth
-  //update with auth
+  async remove(id: string) {
+    return await this.postRepository.delete(id);
+  }
 }

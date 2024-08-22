@@ -140,9 +140,6 @@ describe('UsersService', () => {
   describe('remove', () => {
     describe('when remove is called', () => {
       let response: any;
-      //   const removeSpy = jest
-      //     .spyOn(userRepositoryMock, 'delete')
-      //     .mockResolvedValue('ok');
 
       beforeEach(async () => {
         response = await service.remove(userMock().id);

@@ -11,6 +11,7 @@ const mockPostRepository = {
   findOneBy: jest.fn(),
   create: jest.fn(),
   save: jest.fn(),
+  delete: jest.fn(),
 };
 
 describe('PostsService', () => {
@@ -154,6 +155,26 @@ describe('PostsService', () => {
 
       test('then it should return the posts', async () => {
         expect(sut).toEqual([createdPost]);
+      });
+    });
+  });
+
+  describe('remove', () => {
+    describe('when remove is called', () => {
+      let sut: any;
+      const mockId = 'Test-UUID-4322';
+      jest.spyOn(mockPostRepository, 'delete').mockReturnValue('ok');
+
+      beforeEach(async () => {
+        sut = await service.remove(mockId);
+      });
+
+      test('then it should call delete with the id', () => {
+        expect(mockPostRepository.delete).toHaveBeenCalledWith(mockId);
+      });
+
+      test('then it should return a resolved promise with the value "ok"', () => {
+        expect(sut).toBe('ok');
       });
     });
   });
