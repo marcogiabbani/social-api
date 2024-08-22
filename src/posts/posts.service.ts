@@ -20,7 +20,7 @@ export class PostsService {
     return await this.postRepository.save(newPost);
   }
 
-  async findAll(): Promise<Post[]> {
+  async findAll() {
     return await this.postRepository.find({ relations: ['author'] });
   }
 
@@ -28,7 +28,13 @@ export class PostsService {
     return await this.postRepository.findOneBy({ id: id });
   }
 
+  async findByUserId(userId: string) {
+    return await this.postRepository.find({
+      where: { author: { id: userId } },
+    });
+  }
+
+  //findByCategory
   //deletebyId with auth
   //update with auth
-  // check that the post belongs to the user?
 }
