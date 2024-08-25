@@ -5,6 +5,8 @@ import { Post } from '../entities/post.entity';
 import { userMock } from '../../users/utils/userEntity.mock';
 import { CreatePostDto } from '../dto/create-post.dto';
 import { User } from 'src/users/entities/user.entity';
+import { UpdatePostDto } from '../dto/update-post.dto';
+import { UpdateResult } from 'typeorm';
 
 const mockPostRepository = {
   find: jest.fn(),
@@ -12,12 +14,27 @@ const mockPostRepository = {
   create: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
+  update: jest
+    .fn()
+    .mockImplementation(async (criteria, partialEntity: UpdatePostDto) => {
+      if (criteria.id === 'REAL-UUID') {
+        return {
+          affected: 1,
+          generatedMaps: [],
+          raw: [],
+        } as UpdateResult;
+      } else {
+        return {
+          affected: 0,
+          generatedMaps: [],
+          raw: [],
+        } as UpdateResult;
+      }
+    }),
 };
 
 describe('PostsService', () => {
   let service: PostsService;
-  let repository: typeof mockPostRepository;
-  let mockPost: Post;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -175,6 +192,27 @@ describe('PostsService', () => {
 
       test('then it should return a resolved promise with the value "ok"', () => {
         expect(sut).toBe('ok');
+      });
+    });
+  });
+
+  describe('update', () => {
+    describe('when update is called', () => {
+      let sut: any;
+      const postToUpdate: UpdatePostDto = {
+        content: 'New Content',
+      };
+
+      const realId = 'REAL-UUID';
+      beforeEach(async () => {
+        sut = await service.update(realId, postToUpdate);
+      });
+
+      test('then it should call update in the repository', () => {
+        expect(mockPostRepository.update).toHaveBeenCalledWith(
+          realId,
+          postToUpdate,
+        );
       });
     });
   });
