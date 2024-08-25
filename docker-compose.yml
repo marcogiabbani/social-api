@@ -22,7 +22,7 @@ services:
       - .env.development.local
     environment:
       - NODE_ENV=development
-    volumes: ['./src:/usr/src/app/src']
+    volumes: ['./:/usr/src/app/src']
 
 volumes:
   postgres_data:
