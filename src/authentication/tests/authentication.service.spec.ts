@@ -11,6 +11,20 @@ import * as bcrypt from 'bcrypt';
 import { PostgresErrorCode } from '../../database/pgErrorCodes.enum';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
+/**
+ * be aware,  that throw error should be in this format as i learned in the posts
+ * service
+ * 
+    test('then it should throw a NotFoundException', async () => {
+        await expect(service.update(fakeId, postToUpdate)).rejects.toThrow(
+          new HttpException(
+            `Post with ID ${fakeId} not found`,
+            HttpStatus.NOT_FOUND,
+          ),
+        );
+      });
+ */
+
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
 
