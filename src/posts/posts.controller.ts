@@ -9,6 +9,8 @@ import {
   Req,
   UseInterceptors,
   ClassSerializerInterceptor,
+  Delete,
+  Patch,
   //   Delete,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
@@ -16,6 +18,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 // import { UpdatePostDto } from './dto/update-post.dto';
 import JwtAuthenticationGuard from '../authentication/jwt-authentication.guard';
 import RequestWithUser from '../authentication/interfaces/requestWithUser.interface';
+import { UpdatePostDto } from './dto/update-post.dto';
 
 @Controller('posts')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -24,29 +27,36 @@ export class PostsController {
 
   @Post()
   @UseGuards(JwtAuthenticationGuard)
-  create(@Body() createPostDto: CreatePostDto, @Req() req: RequestWithUser) {
-    console.log(req.user);
-
-    return this.postsService.create(createPostDto, req.user);
+  async create(
+    @Body() createPostDto: CreatePostDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return await this.postsService.create(createPostDto, req.user);
   }
 
   @Get()
   async findAll() {
-    return this.postsService.findAll();
+    return await this.postsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.postsService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    return await this.postsService.findOne(id);
   }
 
-  //   @Patch(':id')
-  //   update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-  //     return this.postsService.update(+id, updatePostDto);
-  //   }
+  @Get('/user/:id')
+  async findByUserId(@Param('id') id: string) {
+    return await this.postsService.findByUserId(id);
+  }
 
-  //   @Delete(':id')
-  //   remove(@Param('id') id: string) {
-  //     return this.postsService.remove(+id);
-  //   }
+  @Patch(':id')
+  @UseGuards(JwtAuthenticationGuard)
+  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
+    return this.postsService.update(id, updatePostDto);
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    return await this.postsService.remove(id);
+  }
 }
