@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import { User } from '../src/users/entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as cookieParser from 'cookie-parser';
-import { cookieExtractor } from './cookieExtractor';
+import { cookieExtractor } from './utils/cookieExtractor';
 import * as jwt from 'jsonwebtoken';
 
 export const userMock = () => ({

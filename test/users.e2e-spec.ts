@@ -5,7 +5,7 @@ import { AppModule } from './../src/app.module';
 import { Repository } from 'typeorm';
 import { User } from '../src/users/entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { userMock } from './userMock';
+import { userMock } from './utils/userMock';
 
 describe('UsersController (e2e)', () => {
   let app: INestApplication;
