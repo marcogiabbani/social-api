@@ -41,6 +41,7 @@ export class PostsService {
       where: { author: { id: userId } },
     });
   }
+
   async remove(id: string) {
     const response = await this.postRepository.delete(id);
     if (response.affected === 0) {
