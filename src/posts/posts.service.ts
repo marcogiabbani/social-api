@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './entities/post.entity';
@@ -26,10 +26,14 @@ export class PostsService {
   }
 
   async findOne(id: string) {
-    // if (!post) {
-    //   throw new NotFoundException(`Post with ID ${id} not found`);
-    // }
-    return await this.postRepository.findOneBy({ id: id });
+    const post = await this.postRepository.findOneBy({ id: id });
+    if (!post) {
+      throw new HttpException(
+        `Post with ID ${id} not found`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return post;
   }
 
   async findByUserId(userId: string) {
@@ -38,17 +42,24 @@ export class PostsService {
     });
   }
   async remove(id: string) {
-    // if (result.affected === 0) {
-    //   throw new NotFoundException(`Post with ID ${id} not found`);
-    // }
-    return await this.postRepository.delete(id);
+    const response = await this.postRepository.delete(id);
+    if (response.affected === 0) {
+      throw new HttpException(
+        `Post with ID ${id} not found`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return response;
   }
 
   async update(id: string, updatePostDto: UpdatePostDto) {
-    // if (updateResult.affected === 0) {
-    //   throw new NotFoundException(`Post with ID ${id} not found`);
-    // }
-    await this.postRepository.update(id, updatePostDto);
-    return this.postRepository.findOneBy({ id });
+    const response = await this.postRepository.update(id, updatePostDto);
+    if (response.affected === 0) {
+      throw new HttpException(
+        `Post with ID ${id} not found`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return response;
   }
 }

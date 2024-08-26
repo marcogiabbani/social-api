@@ -6,32 +6,9 @@ import { userMock } from '../../users/utils/userEntity.mock';
 import { CreatePostDto } from '../dto/create-post.dto';
 import { User } from 'src/users/entities/user.entity';
 import { UpdatePostDto } from '../dto/update-post.dto';
-import { UpdateResult } from 'typeorm';
-
-const mockPostRepository = {
-  find: jest.fn(),
-  findOneBy: jest.fn(),
-  create: jest.fn(),
-  save: jest.fn(),
-  delete: jest.fn(),
-  update: jest
-    .fn()
-    .mockImplementation(async (criteria, partialEntity: UpdatePostDto) => {
-      if (criteria.id === 'REAL-UUID') {
-        return {
-          affected: 1,
-          generatedMaps: [],
-          raw: [],
-        } as UpdateResult;
-      } else {
-        return {
-          affected: 0,
-          generatedMaps: [],
-          raw: [],
-        } as UpdateResult;
-      }
-    }),
-};
+import { postMock } from './utils/postEntity.mock';
+import { HttpException, HttpStatus } from '@nestjs/common';
+import { mockPostRepository } from './utils/postService.mock';
 
 describe('PostsService', () => {
   let service: PostsService;
@@ -56,9 +33,10 @@ describe('PostsService', () => {
 
   describe('create', () => {
     describe('when create is called', () => {
+      const expected = postMock();
       const createPostDto: CreatePostDto = {
-        title: 'Test Title',
-        content: 'Test Content',
+        title: expected.title,
+        content: expected.content,
       };
       const user: User = userMock();
 
@@ -117,32 +95,33 @@ describe('PostsService', () => {
 
   describe('findOne', () => {
     describe('when findOne is called', () => {
-      const createPostDto: CreatePostDto = {
-        title: 'Test Title',
-        content: 'Test Content',
-      };
-      const user: User = userMock();
-      const createdPost = {
-        ...createPostDto,
-        author: user,
-        id: 'Test-UUID-1235',
-      } as Post;
-      jest.spyOn(mockPostRepository, 'findOneBy').mockReturnValue(createdPost);
-
+      const post = postMock();
       let sut: any;
 
       beforeEach(async () => {
-        sut = await service.findOne(createdPost.id);
+        sut = await service.findOne(post.id);
       });
 
       test('then it should search for the post', () => {
         expect(mockPostRepository.findOneBy).toHaveBeenCalledWith({
-          id: createdPost.id,
+          id: post.id,
         });
       });
 
-      test('then it should return the posts', async () => {
-        expect(sut).toEqual(createdPost);
+      test('then it should return the posts', () => {
+        expect(sut).toEqual(post);
+      });
+
+      describe('when no post is found', () => {
+        const fakeId = 'Non-existing-id';
+        test('then it should throw a NotFoundException', async () => {
+          await expect(service.findOne(fakeId)).rejects.toThrow(
+            new HttpException(
+              `Post with ID ${fakeId} not found`,
+              HttpStatus.NOT_FOUND,
+            ),
+          );
+        });
       });
     });
   });
@@ -179,31 +158,43 @@ describe('PostsService', () => {
   describe('remove', () => {
     describe('when remove is called', () => {
       let sut: any;
-      const mockId = 'Test-UUID-4322';
-      jest.spyOn(mockPostRepository, 'delete').mockReturnValue('ok');
+      const post = postMock();
 
       beforeEach(async () => {
-        sut = await service.remove(mockId);
+        sut = await service.remove(post.id);
       });
 
       test('then it should call delete with the id', () => {
-        expect(mockPostRepository.delete).toHaveBeenCalledWith(mockId);
+        expect(mockPostRepository.delete).toHaveBeenCalledWith(post.id);
       });
 
-      test('then it should return a resolved promise with the value "ok"', () => {
-        expect(sut).toBe('ok');
+      test('then it should return a resolved promise with 1 affected', () => {
+        expect(sut.affected).toBe(1);
+      });
+
+      describe('when no post is found', () => {
+        const fakeId = 'mocking-not-existing-id';
+        test('then it should throw a NotFoundException', async () => {
+          await expect(service.remove(fakeId)).rejects.toThrow(
+            new HttpException(
+              `Post with ID ${fakeId} not found`,
+              HttpStatus.NOT_FOUND,
+            ),
+          );
+        });
       });
     });
   });
 
   describe('update', () => {
-    describe('when update is called', () => {
-      let sut: any;
-      const postToUpdate: UpdatePostDto = {
-        content: 'New Content',
-      };
+    let sut: any;
+    const postToUpdate: UpdatePostDto = {
+      content: 'New Content',
+    };
+    const realId = 'REAL-UUID';
+    const fakeId = 'mocking-not-existing-id';
 
-      const realId = 'REAL-UUID';
+    describe('when update is called', () => {
       beforeEach(async () => {
         sut = await service.update(realId, postToUpdate);
       });
@@ -212,6 +203,20 @@ describe('PostsService', () => {
         expect(mockPostRepository.update).toHaveBeenCalledWith(
           realId,
           postToUpdate,
+        );
+      });
+      test('then it should return an affected: 1', () => {
+        expect(sut.affected).toBe(1);
+      });
+    });
+
+    describe('when no post is found', () => {
+      test('then it should throw a NotFoundException', async () => {
+        await expect(service.update(fakeId, postToUpdate)).rejects.toThrow(
+          new HttpException(
+            `Post with ID ${fakeId} not found`,
+            HttpStatus.NOT_FOUND,
+          ),
         );
       });
     });
