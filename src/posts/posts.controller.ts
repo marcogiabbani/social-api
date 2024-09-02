@@ -11,6 +11,7 @@ import {
   ClassSerializerInterceptor,
   Delete,
   Patch,
+  ParseUUIDPipe,
   //   Delete,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
@@ -40,7 +41,7 @@ export class PostsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     return await this.postsService.findOne(id);
   }
 

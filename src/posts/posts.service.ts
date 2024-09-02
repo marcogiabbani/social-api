@@ -27,6 +27,8 @@ export class PostsService {
 
   async findOne(id: string) {
     const post = await this.postRepository.findOneBy({ id: id });
+    console.log('ddddddddddddddd', post);
+
     if (!post) {
       throw new HttpException(
         `Post with ID ${id} not found`,

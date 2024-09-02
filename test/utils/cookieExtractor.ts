@@ -1,4 +1,11 @@
-export const cookieExtractor = (cookie: string) => {
+export interface CookieAttributes {
+  Authentication: string;
+  HttpOnly: boolean;
+  Path: string;
+  'Max-Age': string;
+}
+
+export const cookieExtractor = (cookie: string): CookieAttributes => {
   const cookieArray = cookie[0].split(';');
   const cookieElements: any = {};
   for (const element of cookieArray) {
