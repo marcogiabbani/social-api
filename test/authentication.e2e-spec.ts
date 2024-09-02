@@ -2,9 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
-import { Repository } from 'typeorm';
-import { User } from '../src/users/entities/user.entity';
-import { getRepositoryToken } from '@nestjs/typeorm';
+
 import * as cookieParser from 'cookie-parser';
 import { cookieExtractor } from './utils/cookieExtractor';
 import * as jwt from 'jsonwebtoken';
@@ -16,7 +14,6 @@ export const userMock = () => ({
 
 describe('AuthenticationController (e2e)', () => {
   let app: INestApplication;
-  let userRepository: Repository<User>;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -24,9 +21,6 @@ describe('AuthenticationController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    userRepository = moduleFixture.get<Repository<User>>(
-      getRepositoryToken(User),
-    );
 
     app.use(cookieParser());
     app.useGlobalPipes(new ValidationPipe());
