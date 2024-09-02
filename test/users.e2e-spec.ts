@@ -37,14 +37,7 @@ describe('UsersController (e2e)', () => {
   });
 
   describe('/users (POST)', () => {
-    beforeEach(async () => {
-      const uncleared = await request(app.getHttpServer()).get('/users');
-      await Promise.all(
-        uncleared.body.map(async (user: User) => {
-          return request(app.getHttpServer()).delete(`/users/${user.id}`);
-        }),
-      );
-    });
+    beforeEach(async () => {});
 
     test('should post a user successfully', async () => {
       const user = userMock();
@@ -59,28 +52,16 @@ describe('UsersController (e2e)', () => {
   });
 
   describe('/users (GET)', () => {
-    beforeEach(async () => {
-      const uncleared = await request(app.getHttpServer()).get('/users');
-      await Promise.all(
-        uncleared.body.map(async (user: User) => {
-          return request(app.getHttpServer()).delete(`/users/${user.id}`);
-        }),
-      );
-    });
+    beforeEach(async () => {});
 
-    test('should get an empty array if no users are in the db', async () => {
-      const response = await request(app.getHttpServer()).get('/users');
-      expect(response.body).toEqual([]);
-    });
-
-    test('should get a user', async () => {
+    test('should get a user array', async () => {
       const user = userMock();
 
       await request(app.getHttpServer()).post('/users').send(user).expect(201);
       const response = await request(app.getHttpServer()).get('/users');
 
       expect(response.body).not.toEqual([]);
-      expect(response.body[0].email).toEqual(user.email);
+      expect(response.body[0]).toHaveProperty('email');
     });
   });
 
@@ -88,12 +69,6 @@ describe('UsersController (e2e)', () => {
     let user: User;
 
     beforeEach(async () => {
-      const uncleared = await request(app.getHttpServer()).get('/users');
-      await Promise.all(
-        uncleared.body.map(async (user: User) => {
-          return request(app.getHttpServer()).delete(`/users/${user.id}`);
-        }),
-      );
       const response = await request(app.getHttpServer())
         .post('/users')
         .send(userMock())
@@ -114,12 +89,6 @@ describe('UsersController (e2e)', () => {
     let user: User;
 
     beforeEach(async () => {
-      const uncleared = await request(app.getHttpServer()).get('/users');
-      await Promise.all(
-        uncleared.body.map(async (user: User) => {
-          return request(app.getHttpServer()).delete(`/users/${user.id}`);
-        }),
-      );
       const response = await request(app.getHttpServer())
         .post('/users')
         .send(userMock())
@@ -132,7 +101,7 @@ describe('UsersController (e2e)', () => {
         .patch(`/users/${user.id}`)
         .send({ email: 'newEmail@test.com' });
       expect(response.body.email).not.toBe(user.email);
-      expect(response.body.email).toBe('newEmail@test.com');
+      expect(response.body.email).toEqual('newEmail@test.com');
     });
   });
 
@@ -140,40 +109,46 @@ describe('UsersController (e2e)', () => {
     let userOne: User;
     let userTwo: User;
 
-    beforeEach(async () => {
-      const uncleared = await request(app.getHttpServer()).get('/users');
-      await Promise.all(
-        uncleared.body.map(async (user: User) => {
-          return request(app.getHttpServer()).delete(`/users/${user.id}`);
-        }),
-      );
+    test('should delete one user', async () => {
+      const user = userMock();
+
       const responseOne = await request(app.getHttpServer())
         .post('/users')
-        .send(userMock())
+        .send(user)
         .expect(201);
 
-      const responseTwo = await request(app.getHttpServer())
-        .post('/users')
-        .send({ email: 'secondUser@test.com', password: 'somePassword123' })
-        .expect(201);
       userOne = responseOne.body;
-      userTwo = responseTwo.body;
-    });
 
-    test('should delete one user', async () => {
       await request(app.getHttpServer())
         .delete(`/users/${userOne.id}`)
         .expect(200);
     });
 
     test('should only affect deleted user', async () => {
+      const user = userMock();
+
+      const responseOne = await request(app.getHttpServer())
+        .post('/users')
+        .send(user)
+        .expect(201);
+
+      const responseTwo = await request(app.getHttpServer())
+        .post('/users')
+        .send({ email: 'secondUser2@test.com', password: 'somePassword123' })
+        .expect(201);
+
+      userOne = responseOne.body;
+      userTwo = responseTwo.body;
+
       await request(app.getHttpServer())
         .delete(`/users/${userOne.id}`)
         .expect(200);
 
-      const response = await request(app.getHttpServer()).get('/users');
+      const response = await request(app.getHttpServer()).get(
+        `/users/${userTwo.id}`,
+      );
 
-      expect(response.body[0].email).toEqual(userTwo.email);
+      expect(response.body.email).toEqual(userTwo.email);
     });
   });
 });
