@@ -91,52 +91,103 @@ describe('PostsController (e2e)', () => {
       expect(sut.body[0]).toHaveProperty('content');
     });
 
-    describe('get post by id and', () => {
-      test('get post if it exists', async () => {
-        //arrange
-        const post = postMock();
+    test('get post if it exists', async () => {
+      //arrange
+      const post = postMock();
 
-        const createdPost = await request(app.getHttpServer())
-          .post('/posts')
-          .set('Cookie', loggedInUser.headers['set-cookie'][0])
-          .send(post)
-          .expect(201);
+      const createdPost = await request(app.getHttpServer())
+        .post('/posts')
+        .set('Cookie', loggedInUser.headers['set-cookie'][0])
+        .send(post)
+        .expect(201);
 
-        //act
-        const sut = await request(app.getHttpServer())
-          .get(`/posts/${createdPost.body.id}`)
-          .set('Cookie', loggedInUser.headers['set-cookie'][0])
-          .expect(200);
+      //act
+      const sut = await request(app.getHttpServer())
+        .get(`/posts/${createdPost.body.id}`)
+        .set('Cookie', loggedInUser.headers['set-cookie'][0])
+        .expect(200);
 
-        //assert
-        expect(sut.body).toHaveProperty('id', createdPost.body.id);
-        expect(sut.body).toHaveProperty('title', post.title);
-        expect(sut.body).toHaveProperty('content', post.content);
-      });
-
-      test('alert if the post was not found', async () => {
-        //arrange
-        const mockId = 'non-existing-od';
-        //act
-        const sut = await request(app.getHttpServer())
-          .get(`/posts/${mockId}`)
-          .set('Cookie', loggedInUser.headers['set-cookie'][0])
-          .expect(404);
-
-        //assert
-        expect(sut.body.message).toEqual(`Post with ID ${mockId} not found`);
-      });
+      //assert
+      expect(sut.body).toHaveProperty('id', createdPost.body.id);
+      expect(sut.body).toHaveProperty('title', post.title);
+      expect(sut.body).toHaveProperty('content', post.content);
     });
 
-    /**
-     * get post by id
-     * edit a post
-     * delete a post
-     */
+    test('be alerted if the post was not found', async () => {
+      //arrange
+      const mockId = 'edbc7455-ee7d-4fd0-a008-792c737ed699';
+      //act
+      const sut = await request(app.getHttpServer())
+        .get(`/posts/${mockId}`)
+        .set('Cookie', loggedInUser.headers['set-cookie'][0])
+        .expect(404);
+
+      //assert
+      expect(sut.body.message).toEqual(`Post with ID ${mockId} not found`);
+    });
+
+    test('edit a post', async () => {
+      //arrange
+      const post = postMock();
+
+      const createdPost = await request(app.getHttpServer())
+        .post('/posts')
+        .set('Cookie', loggedInUser.headers['set-cookie'][0])
+        .send(post)
+        .expect(201);
+
+      //act
+      await request(app.getHttpServer())
+        .patch(`/posts/${createdPost.body.id}`)
+        .set('Cookie', loggedInUser.headers['set-cookie'][0])
+        .send({ title: 'New title' })
+        .expect(200);
+
+      const sut = await request(app.getHttpServer())
+        .get(`/posts/${createdPost.body.id}`)
+        .set('Cookie', loggedInUser.headers['set-cookie'][0]);
+
+      //assert
+      expect(sut.body.title).not.toBe(createdPost.body.title);
+      expect(sut.body.title).toEqual('New title');
+    });
+
+    test('delete a post', async () => {
+      //arrange
+      const post = postMock();
+
+      const createdPost = await request(app.getHttpServer())
+        .post('/posts')
+        .set('Cookie', loggedInUser.headers['set-cookie'][0])
+        .send(post)
+        .expect(201);
+
+      //act
+      const response = await request(app.getHttpServer())
+        .delete(`/posts/${createdPost.body.id}`)
+        .set('Cookie', loggedInUser.headers['set-cookie'][0])
+        .expect(200);
+
+      const sut = await request(app.getHttpServer())
+        .get(`/posts/${createdPost.body.id}`)
+        .set('Cookie', loggedInUser.headers['set-cookie'][0]);
+
+      //assert
+      expect(response.body.affected).toBe(1);
+      expect(sut.body.message).toEqual(
+        `Post with ID ${createdPost.body.id} not found`,
+      );
+    });
+  });
+
+  describe('Every user should be able to', () => {
+    // * get all posts
+    //should register, login and create posts for them to be able.
+    //time to seed?
   });
 
   /**
-   * Every user should be able to
+   *
    * get all posts
    * get post by id
    */

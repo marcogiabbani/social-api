@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './entities/post.entity';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { UpdatePostDto } from './dto/update-post.dto';
 
@@ -27,8 +27,6 @@ export class PostsService {
 
   async findOne(id: string) {
     const post = await this.postRepository.findOneBy({ id: id });
-    console.log('ddddddddddddddd', post);
-
     if (!post) {
       throw new HttpException(
         `Post with ID ${id} not found`,
