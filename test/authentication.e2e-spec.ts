@@ -2,15 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
-
 import * as cookieParser from 'cookie-parser';
 import { cookieExtractor } from './utils/cookieExtractor';
 import * as jwt from 'jsonwebtoken';
-
-export const userMock = () => ({
-  email: `${Date.now()}@example.com`,
-  password: 'somePassword123',
-});
+import { userMock } from './utils/userMock';
 
 describe('AuthenticationController (e2e)', () => {
   let app: INestApplication;

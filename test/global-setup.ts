@@ -3,8 +3,6 @@ import { DataSource } from 'typeorm';
 
 dotenv.config({ path: '.env.test.local' });
 
-console.log('pass', process.env.POSTGRES_USER);
-
 const dataSource = new DataSource({
   type: 'postgres',
   host: process.env.HOST,
@@ -17,6 +15,7 @@ const dataSource = new DataSource({
 });
 
 module.exports = async function () {
+  console.log('Cleaning..');
   await dataSource.initialize();
 
   const queryRunner = dataSource.createQueryRunner();
