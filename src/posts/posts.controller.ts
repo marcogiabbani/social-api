@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  //   Patch,
   Param,
   UseGuards,
   Req,
@@ -11,12 +10,9 @@ import {
   ClassSerializerInterceptor,
   Delete,
   Patch,
-  ParseUUIDPipe,
-  //   Delete,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
-// import { UpdatePostDto } from './dto/update-post.dto';
 import JwtAuthenticationGuard from '../authentication/jwt-authentication.guard';
 import RequestWithUser from '../authentication/interfaces/requestWithUser.interface';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -57,6 +53,7 @@ export class PostsController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthenticationGuard)
   async remove(@Param('id') id: string) {
     return await this.postsService.remove(id);
   }

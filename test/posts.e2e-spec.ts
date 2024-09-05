@@ -225,7 +225,58 @@ describe('PostsController (e2e)', () => {
       });
     });
 
-    describe('Without login, users should not be able to', () => {});
+    describe('Without login, users should not be able to', () => {
+      test('create a post', async () => {
+        //arrange
+        const post = postMock();
+
+        //act
+        const sut = await request(app.getHttpServer())
+          .post('/posts')
+          .send(post)
+          .expect(401);
+
+        //assert
+        expect(sut.body.message).toBe('Unauthorized');
+      });
+
+      test('edit a post', async () => {
+        //arrange
+
+        const posts = await request(app.getHttpServer())
+          .get(`/posts`)
+          .set('Cookie', loggedInUser.headers['set-cookie'][0]);
+
+        //act
+        //assuming there are posts from previous test,
+        //because clean up is only done at setup
+        const sut = await request(app.getHttpServer())
+          .patch(`/posts/${posts.body[0].id}`)
+          .send({ title: 'New title' })
+          .expect(401);
+
+        //assert
+        expect(sut.body.message).toBe('Unauthorized');
+      });
+
+      test('delete a post', async () => {
+        //arrange
+
+        const posts = await request(app.getHttpServer())
+          .get(`/posts`)
+          .set('Cookie', loggedInUser.headers['set-cookie'][0]);
+
+        //act
+        //assuming there are posts from previous test,
+        //because clean up is only done at setup
+        const sut = await request(app.getHttpServer())
+          .delete(`/posts/${posts.body[0].id}`)
+          .expect(401);
+
+        //assert
+        expect(sut.body.message).toBe('Unauthorized');
+      });
+    });
   });
 });
 
