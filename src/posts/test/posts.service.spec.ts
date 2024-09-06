@@ -8,7 +8,7 @@ import { User } from 'src/users/entities/user.entity';
 import { UpdatePostDto } from '../dto/update-post.dto';
 import { postMock } from './utils/postEntity.mock';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { mockPostRepository } from './utils/postService.mock';
+import { mockPostRepository } from './utils/postRepository.mock';
 
 describe('PostsService', () => {
   let service: PostsService;
