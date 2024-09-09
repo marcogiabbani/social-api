@@ -5,22 +5,7 @@ import { postMock } from './utils/postEntity.mock';
 import { CreatePostDto } from '../dto/create-post.dto';
 import RequestWithUser from '../../authentication/interfaces/requestWithUser.interface';
 import { UpdatePostDto } from '../dto/update-post.dto';
-
-const mockPostService = {
-  findAll: jest.fn().mockResolvedValue([postMock()]),
-  findOne: jest.fn().mockResolvedValue(postMock()),
-  create: jest.fn().mockResolvedValue(postMock()),
-  save: jest.fn(),
-  findByUserId: jest.fn().mockResolvedValue(postMock()),
-  update: jest.fn().mockResolvedValue({
-    affected: 1,
-    raw: [],
-  }),
-  remove: jest.fn().mockResolvedValue({
-    affected: 1,
-    raw: [],
-  }),
-};
+import { mockPostService } from './utils/postService.mock';
 
 describe('PostsController', () => {
   let controller: PostsController;
