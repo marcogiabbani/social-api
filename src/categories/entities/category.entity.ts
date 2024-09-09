@@ -24,7 +24,7 @@ export class Category {
   })
   updatedAt!: Date;
 
-  @Column()
+  @Column({ unique: true })
   public name: string;
 
   @ManyToMany(() => Post, (post: Post) => post.categories)

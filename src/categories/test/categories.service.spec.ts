@@ -114,34 +114,39 @@ describe('CategoriesService', () => {
     });
   });
 
-  describe('when update is called', () => {
-    let sut: any;
-    const categoryToUpdate: UpdateCategoryDto = {
-      name: 'New Name',
-    };
-    const realId = 'REAL-UUID';
-    const fakeId = 'mocking-not-existing-id';
-    beforeEach(async () => {
-      sut = await service.update(realId, categoryToUpdate);
-    });
+  describe('update', () => {
+    describe('when update is called', () => {
+      let sut: any;
+      const categoryToUpdate: UpdateCategoryDto = {
+        name: 'New Name',
+      };
+      const realId = 'REAL-UUID';
+      const fakeId = 'mocking-not-existing-id';
+      beforeEach(async () => {
+        sut = await service.update(realId, categoryToUpdate);
+      });
 
-    test('then it should call update in the repository', () => {
-      expect(categoryRepositoryMock.update).toHaveBeenCalledWith(
-        realId,
-        categoryToUpdate,
-      );
-    });
-    test('then it should return an affected: 1', () => {
-      expect(sut.affected).toBe(1);
-    });
-    describe('when no post is found', () => {
-      test('then it should throw a NotFoundException', async () => {
-        await expect(service.update(fakeId, categoryToUpdate)).rejects.toThrow(
-          new HttpException(
-            `Category with ID ${fakeId} not found`,
-            HttpStatus.NOT_FOUND,
-          ),
+      test('then it should call update in the repository', () => {
+        expect(categoryRepositoryMock.update).toHaveBeenCalledWith(
+          realId,
+          categoryToUpdate,
         );
+      });
+      test('then it should return an affected: 1', () => {
+        expect(sut.affected).toBe(1);
+      });
+
+      describe('and no post is found', () => {
+        test('then it should throw a NotFoundException', async () => {
+          await expect(
+            service.update(fakeId, categoryToUpdate),
+          ).rejects.toThrow(
+            new HttpException(
+              `Category with ID ${fakeId} not found`,
+              HttpStatus.NOT_FOUND,
+            ),
+          );
+        });
       });
     });
   });
@@ -163,7 +168,7 @@ describe('CategoriesService', () => {
         expect(sut.affected).toBe(1);
       });
 
-      describe('when no category is found', () => {
+      describe('and no category is found', () => {
         const fakeId = 'mocking-not-existing-id';
         test('then it should throw a NotFoundException', async () => {
           await expect(service.remove(fakeId)).rejects.toThrow(
