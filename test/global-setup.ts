@@ -15,11 +15,13 @@ const dataSource = new DataSource({
 });
 
 module.exports = async function () {
-  console.log('Cleaning..');
   await dataSource.initialize();
 
   const queryRunner = dataSource.createQueryRunner();
-  const tables = await queryRunner.getTables(['user']);
+  const tables = await queryRunner.getTables(['user', 'category']);
+  for (const table of tables) {
+    console.log(`Cleaning: ${table.name}`);
+  }
 
   try {
     await queryRunner.startTransaction();
