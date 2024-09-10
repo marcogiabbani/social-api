@@ -242,10 +242,7 @@ describe('PostsController (e2e)', () => {
 
       test('edit a post', async () => {
         //arrange
-
-        const posts = await request(app.getHttpServer())
-          .get(`/posts`)
-          .set('Cookie', loggedInUser.headers['set-cookie'][0]);
+        const posts = await request(app.getHttpServer()).get(`/posts`);
 
         //act
         //assuming there are posts from previous test,
@@ -279,10 +276,3 @@ describe('PostsController (e2e)', () => {
     });
   });
 });
-
-/**
- * Without log in a user should not be able to
- * create a post
- * edit a post
- * delete a post
- */
