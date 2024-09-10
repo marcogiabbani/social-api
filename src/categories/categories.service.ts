@@ -4,6 +4,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from './entities/category.entity';
 import { Repository } from 'typeorm';
+import { PostgresErrorCode } from '../database/pgErrorCodes.enum';
 
 @Injectable()
 export class CategoriesService {
@@ -13,8 +14,21 @@ export class CategoriesService {
   ) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
-    const newCategory = this.categoriesRepository.create(createCategoryDto);
-    return await this.categoriesRepository.save(newCategory);
+    try {
+      const newCategory = this.categoriesRepository.create(createCategoryDto);
+      return await this.categoriesRepository.save(newCategory);
+    } catch (error: any) {
+      if (error?.code === PostgresErrorCode.UniqueViolation) {
+        throw new HttpException(
+          'Category with than name already exists',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async findAll() {
