@@ -23,8 +23,6 @@ describe('UsersController (e2e)', () => {
   });
 
   describe('/users (POST)', () => {
-    beforeEach(async () => {});
-
     test('should post a user successfully', async () => {
       const user = userMock();
       const response = await request(app.getHttpServer())
@@ -38,8 +36,6 @@ describe('UsersController (e2e)', () => {
   });
 
   describe('/users (GET)', () => {
-    beforeEach(async () => {});
-
     test('should get a user array', async () => {
       const user = userMock();
 
