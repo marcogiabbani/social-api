@@ -4,7 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Category } from '../entities/category.entity';
 import { categoryMock } from './utils/categoryEntity.mock';
 import { CreateCategoryDto } from '../dto/create-category.dto';
-import { ConflictException, HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { categoryRepositoryMock } from './utils/categoryRepository.mock';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
 
@@ -234,7 +234,6 @@ describe('CategoriesService', () => {
           expectedCategory.id,
         );
 
-        console.log(sut);
         //assert
         expect(service.findOne).toHaveBeenCalledWith(expectedCategory.id);
         expect(mockPostService.findOne).toHaveBeenCalledWith(expectedPost.id);
@@ -278,22 +277,6 @@ describe('CategoriesService', () => {
         ).rejects.toThrow(HttpException);
         expect(mockPostService.save).not.toHaveBeenCalled();
       });
-
-      //   test('If the category is already added, it should throw an exception', async () => {
-      //     //arrange
-      //     const expectedCategory = categoryMock();
-      //     const expectedPost = postMock();
-      //     expectedPost.categories.push(expectedCategory);
-      //     jest.spyOn(service, 'findOne').mockResolvedValue(expectedCategory);
-      //     jest.spyOn(mockPostService, 'findOne').mockResolvedValue(expectedPost);
-      //     jest.spyOn(mockPostService, 'save').mockResolvedValue(expectedPost);
-
-      //     //act & assert
-      //     await expect(
-      //       service.linkCategory(expectedCategory.id, expectedPost.id),
-      //     ).rejects.toThrow(ConflictException);
-      //     expect(mockPostService.save).not.toHaveBeenCalled();
-      //   });
     });
   });
 });
