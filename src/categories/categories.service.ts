@@ -6,6 +6,8 @@ import { Category } from './entities/category.entity';
 import { Repository } from 'typeorm';
 import { PostgresErrorCode } from '../database/pgErrorCodes.enum';
 import { PostsService } from '../posts/posts.service';
+import { Post } from '../posts/entities/post.entity';
+
 @Injectable()
 export class CategoriesService {
   constructor(
@@ -73,10 +75,51 @@ export class CategoriesService {
     return response;
   }
 
-  async linkCategory(categoryId: string, postId: string) {
-    const category = await this.findOne(categoryId);
-    const post = await this.postsService.findOne(postId);
+  //   async linkCategory(categoryId: string, postId: string) {
+  //     const [category, post] = await Promise.all([
+  //       this.findOne(categoryId),
+  //       this.postsService.findOne(postId),
+  //     ]);
+  //     if (this.isCategoryLinked(post, category)) {
+  //       throw new ConflictException('Category  is already linked to the post');
+  //     }
+  //     post.categories.push(category);
+  //     return await this.postsService.save(post);
+  //   }
+
+  //   async unlinkCategory(categoryId: string, postId: string) {
+  //     const [category, post] = await Promise.all([
+  //       await this.findOne(categoryId),
+  //       await this.postsService.findOne(postId),
+  //     ]);
+  //     if (!this.isCategoryLinked(post, category)) {
+  //       throw new ConflictException('Category  is not linked to the post');
+  //     }
+  //     post.categories = post.categories.filter((c) => c.id !== category.id);
+  //     return await this.postsService.save(post);
+  //   }
+  private isCategoryLinked(post: Post, category: Category): boolean {
+    return post.categories.some((cat: Category) => cat.id === category.id);
+  }
+
+  private async linkCategory(post: Post, category: Category) {
     post.categories.push(category);
     return await this.postsService.save(post);
+  }
+  private async unlinkCategory(post: Post, category: Category) {
+    post.categories = post.categories.filter((c) => c.id !== category.id);
+    return await this.postsService.save(post);
+  }
+
+  async modifyCategoryLink(postId: string, categoryId: string): Promise<Post> {
+    const [category, post] = await Promise.all([
+      this.findOne(categoryId),
+      this.postsService.findOne(postId),
+    ]);
+    if (!this.isCategoryLinked(post, category)) {
+      return await this.linkCategory(post, category);
+    } else {
+      return await this.unlinkCategory(post, category);
+    }
   }
 }

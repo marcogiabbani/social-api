@@ -4,7 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Category } from '../entities/category.entity';
 import { categoryMock } from './utils/categoryEntity.mock';
 import { CreateCategoryDto } from '../dto/create-category.dto';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { ConflictException, HttpException, HttpStatus } from '@nestjs/common';
 import { categoryRepositoryMock } from './utils/categoryRepository.mock';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
 
@@ -190,12 +190,12 @@ describe('CategoriesService', () => {
     });
   });
 
-  describe('linkCategory', () => {
-    describe('when linkCategory is called', () => {
+  describe('modifyCategory', () => {
+    describe('when modifyCategory is called', () => {
       beforeEach(() => {
-        jest.clearAllMocks(); // Clear mocks to prevent interference
+        jest.clearAllMocks();
       });
-      test('then a relation between a category and a post should be established', async () => {
+      test('then a category should be linked to the post when it is not already linked', async () => {
         //arrange
         const expectedCategory = categoryMock();
         const expectedPost = postMock();
@@ -206,9 +206,9 @@ describe('CategoriesService', () => {
         jest.spyOn(mockPostService, 'save').mockResolvedValue(expectedPost);
 
         //act
-        const sut = await service.linkCategory(
-          expectedCategory.id,
+        const sut = await service.modifyCategoryLink(
           expectedPost.id,
+          expectedCategory.id,
         );
 
         //assert
@@ -216,6 +216,30 @@ describe('CategoriesService', () => {
         expect(mockPostService.findOne).toHaveBeenCalledWith(expectedPost.id);
         expect(mockPostService.save).toHaveBeenCalledWith(expectedPost);
         expect(sut.categories).toContainEqual(expectedCategory);
+      });
+
+      test('then a category should be unlinked when it is already linked', async () => {
+        //arrange
+        const expectedCategory = categoryMock();
+        const expectedPost = postMock();
+        expectedPost.categories = [expectedCategory];
+
+        jest.spyOn(service, 'findOne').mockResolvedValue(expectedCategory);
+        jest.spyOn(mockPostService, 'findOne').mockResolvedValue(expectedPost);
+        jest.spyOn(mockPostService, 'save').mockResolvedValue(expectedPost);
+
+        //act
+        const sut = await service.modifyCategoryLink(
+          expectedPost.id,
+          expectedCategory.id,
+        );
+
+        console.log(sut);
+        //assert
+        expect(service.findOne).toHaveBeenCalledWith(expectedCategory.id);
+        expect(mockPostService.findOne).toHaveBeenCalledWith(expectedPost.id);
+        expect(mockPostService.save).toHaveBeenCalledWith(expectedPost);
+        expect(sut.categories).not.toContainEqual(expectedCategory);
       });
 
       test('If category is not found it should throw an error', async () => {
@@ -232,7 +256,7 @@ describe('CategoriesService', () => {
 
         //act and assert
         await expect(
-          service.linkCategory('FAKE-category-id', expectedPost.id),
+          service.modifyCategoryLink('FAKE-category-id', expectedPost.id),
         ).rejects.toThrow(HttpException);
         expect(mockPostService.save).not.toHaveBeenCalled();
       });
@@ -250,10 +274,26 @@ describe('CategoriesService', () => {
 
         //act and assert
         await expect(
-          service.linkCategory(expectedCategory.id, 'FAKE-Post-id'),
+          service.modifyCategoryLink(expectedCategory.id, 'FAKE-Post-id'),
         ).rejects.toThrow(HttpException);
         expect(mockPostService.save).not.toHaveBeenCalled();
       });
+
+      //   test('If the category is already added, it should throw an exception', async () => {
+      //     //arrange
+      //     const expectedCategory = categoryMock();
+      //     const expectedPost = postMock();
+      //     expectedPost.categories.push(expectedCategory);
+      //     jest.spyOn(service, 'findOne').mockResolvedValue(expectedCategory);
+      //     jest.spyOn(mockPostService, 'findOne').mockResolvedValue(expectedPost);
+      //     jest.spyOn(mockPostService, 'save').mockResolvedValue(expectedPost);
+
+      //     //act & assert
+      //     await expect(
+      //       service.linkCategory(expectedCategory.id, expectedPost.id),
+      //     ).rejects.toThrow(ConflictException);
+      //     expect(mockPostService.save).not.toHaveBeenCalled();
+      //   });
     });
   });
 });
