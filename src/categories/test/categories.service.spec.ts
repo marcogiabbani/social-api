@@ -8,6 +8,10 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { categoryRepositoryMock } from './utils/categoryRepository.mock';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
 
+import { postMock } from '../../posts/test/utils/postEntity.mock';
+import { PostsService } from '../../posts/posts.service';
+import { mockPostService } from '../../posts/test/utils/postService.mock';
+
 describe('CategoriesService', () => {
   let service: CategoriesService;
 
@@ -19,8 +23,12 @@ describe('CategoriesService', () => {
           provide: getRepositoryToken(Category),
           useValue: categoryRepositoryMock,
         },
+        PostsService,
       ],
-    }).compile();
+    })
+      .overrideProvider(PostsService)
+      .useValue(mockPostService)
+      .compile();
 
     service = module.get<CategoriesService>(CategoriesService);
   });
@@ -178,6 +186,73 @@ describe('CategoriesService', () => {
             ),
           );
         });
+      });
+    });
+  });
+
+  describe('linkCategory', () => {
+    describe('when linkCategory is called', () => {
+      beforeEach(() => {
+        jest.clearAllMocks(); // Clear mocks to prevent interference
+      });
+      test('then a relation between a category and a post should be established', async () => {
+        //arrange
+        const expectedCategory = categoryMock();
+        const expectedPost = postMock();
+        expectedPost.categories = [];
+
+        jest.spyOn(service, 'findOne').mockResolvedValue(expectedCategory);
+        jest.spyOn(mockPostService, 'findOne').mockResolvedValue(expectedPost);
+        jest.spyOn(mockPostService, 'save').mockResolvedValue(expectedPost);
+
+        //act
+        const sut = await service.linkCategory(
+          expectedCategory.id,
+          expectedPost.id,
+        );
+
+        //assert
+        expect(service.findOne).toHaveBeenCalledWith(expectedCategory.id);
+        expect(mockPostService.findOne).toHaveBeenCalledWith(expectedPost.id);
+        expect(mockPostService.save).toHaveBeenCalledWith(expectedPost);
+        expect(sut.categories).toContainEqual(expectedCategory);
+      });
+
+      test('If category is not found it should throw an error', async () => {
+        //arrange
+        const expectedPost = postMock();
+        expectedPost.categories = [];
+
+        jest
+          .spyOn(service, 'findOne')
+          .mockRejectedValue(
+            new HttpException('Category not found', HttpStatus.NOT_FOUND),
+          );
+        jest.spyOn(mockPostService, 'findOne').mockResolvedValue(expectedPost);
+
+        //act and assert
+        await expect(
+          service.linkCategory('FAKE-category-id', expectedPost.id),
+        ).rejects.toThrow(HttpException);
+        expect(mockPostService.save).not.toHaveBeenCalled();
+      });
+
+      test('If post is not found it should throw an error`', async () => {
+        //arrange
+        const expectedCategory = categoryMock();
+
+        jest.spyOn(service, 'findOne').mockResolvedValue(expectedCategory);
+        jest
+          .spyOn(mockPostService, 'findOne')
+          .mockRejectedValue(
+            new HttpException('Post not found', HttpStatus.NOT_FOUND),
+          );
+
+        //act and assert
+        await expect(
+          service.linkCategory(expectedCategory.id, 'FAKE-Post-id'),
+        ).rejects.toThrow(HttpException);
+        expect(mockPostService.save).not.toHaveBeenCalled();
       });
     });
   });

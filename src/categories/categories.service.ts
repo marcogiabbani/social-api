@@ -5,12 +5,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from './entities/category.entity';
 import { Repository } from 'typeorm';
 import { PostgresErrorCode } from '../database/pgErrorCodes.enum';
-
+import { PostsService } from '../posts/posts.service';
 @Injectable()
 export class CategoriesService {
   constructor(
     @InjectRepository(Category)
     private readonly categoriesRepository: Repository<Category>,
+
+    private readonly postsService: PostsService,
   ) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
@@ -69,5 +71,12 @@ export class CategoriesService {
       );
     }
     return response;
+  }
+
+  async linkCategory(categoryId: string, postId: string) {
+    const category = await this.findOne(categoryId);
+    const post = await this.postsService.findOne(postId);
+    post.categories.push(category);
+    return await this.postsService.save(post);
   }
 }

@@ -63,4 +63,8 @@ export class PostsService {
     }
     return response;
   }
+
+  async save(post: Post) {
+    return await this.postRepository.save(post);
+  }
 }
