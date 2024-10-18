@@ -50,4 +50,13 @@ export class CategoriesController {
   async remove(@Param('id') id: string) {
     return await this.categoriesService.remove(id);
   }
+
+  @Patch(':id/post/:postId')
+  @UseGuards(JwtAuthenticationGuard)
+  async modifyCategoryLink(
+    @Param('postId') postId: string,
+    @Param('id') id: string,
+  ) {
+    return await this.categoriesService.modifyCategoryLink(postId, id);
+  }
 }

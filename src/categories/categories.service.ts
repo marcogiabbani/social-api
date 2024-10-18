@@ -75,29 +75,6 @@ export class CategoriesService {
     return response;
   }
 
-  //   async linkCategory(categoryId: string, postId: string) {
-  //     const [category, post] = await Promise.all([
-  //       this.findOne(categoryId),
-  //       this.postsService.findOne(postId),
-  //     ]);
-  //     if (this.isCategoryLinked(post, category)) {
-  //       throw new ConflictException('Category  is already linked to the post');
-  //     }
-  //     post.categories.push(category);
-  //     return await this.postsService.save(post);
-  //   }
-
-  //   async unlinkCategory(categoryId: string, postId: string) {
-  //     const [category, post] = await Promise.all([
-  //       await this.findOne(categoryId),
-  //       await this.postsService.findOne(postId),
-  //     ]);
-  //     if (!this.isCategoryLinked(post, category)) {
-  //       throw new ConflictException('Category  is not linked to the post');
-  //     }
-  //     post.categories = post.categories.filter((c) => c.id !== category.id);
-  //     return await this.postsService.save(post);
-  //   }
   private isCategoryLinked(post: Post, category: Category): boolean {
     return post.categories.some((cat: Category) => cat.id === category.id);
   }
