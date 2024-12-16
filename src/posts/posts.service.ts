@@ -67,4 +67,17 @@ export class PostsService {
   async save(post: Post) {
     return await this.postRepository.save(post);
   }
+  async findOneWithCategories(id: string) {
+    const post = await this.postRepository.findOne({
+      where: { id: id },
+      relations: ['categories'],
+    });
+    if (!post) {
+      throw new HttpException(
+        `Post with ID ${id} not found`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return post;
+  }
 }

@@ -13,4 +13,5 @@ export const mockPostService = {
     affected: 1,
     raw: [],
   }),
+  findOneWithCategories: jest.fn().mockResolvedValue(postMock()),
 };

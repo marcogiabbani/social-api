@@ -5,6 +5,7 @@ import * as cookieParser from 'cookie-parser';
 import { AppModule } from './../src/app.module';
 import { categoryMock } from './utils/categoryMock';
 import { userMock } from './utils/userMock';
+import { postMock } from './utils/postMock';
 
 describe('PostsController (e2e)', () => {
   let app: INestApplication;
@@ -196,6 +197,35 @@ describe('PostsController (e2e)', () => {
         expect(sut.body.message).toEqual(
           `Category with ID ${createdCategory.body.id} not found`,
         );
+      });
+
+      test('link a category to a post', async () => {
+        //arrange
+        const category = categoryMock();
+        const post = postMock();
+
+        const createdCategory = await request(app.getHttpServer())
+          .post('/categories')
+          .set('Cookie', loggedInUser.headers['set-cookie'][0])
+          .send(category)
+          .expect(201);
+
+        const createdPost = await request(app.getHttpServer())
+          .post('/posts')
+          .set('Cookie', loggedInUser.headers['set-cookie'][0])
+          .send(post)
+          .expect(201);
+
+        //act
+        const sut = await request(app.getHttpServer())
+          .patch(
+            `/categories/${createdCategory.body.id}/post/${createdPost.body.id}`,
+          )
+          .set('Cookie', loggedInUser.headers['set-cookie'][0])
+          .expect(200);
+
+        //assert
+        expect(sut.body.categories[0].name).toBe(category.name);
       });
     });
 

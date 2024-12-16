@@ -91,7 +91,7 @@ export class CategoriesService {
   async modifyCategoryLink(postId: string, categoryId: string): Promise<Post> {
     const [category, post] = await Promise.all([
       this.findOne(categoryId),
-      this.postsService.findOne(postId),
+      this.postsService.findOneWithCategories(postId),
     ]);
     if (!this.isCategoryLinked(post, category)) {
       return await this.linkCategory(post, category);

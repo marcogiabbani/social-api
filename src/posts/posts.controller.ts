@@ -57,4 +57,9 @@ export class PostsController {
   async remove(@Param('id') id: string) {
     return await this.postsService.remove(id);
   }
+
+  @Get(':id/categories')
+  async findOneWithCategories(@Param('id') id: string) {
+    return await this.postsService.findOneWithCategories(id);
+  }
 }
