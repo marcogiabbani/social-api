@@ -249,43 +249,6 @@ describe('CategoriesService', () => {
         expect(mockPostService.save).toHaveBeenCalledWith(expectedPost);
         expect(sut.categories).not.toContainEqual(expectedCategory);
       });
-
-      xtest('If category is not found it should throw an error', async () => {
-        //arrange
-        const expectedPost = postMock();
-        expectedPost.categories = [];
-
-        jest
-          .spyOn(service, 'findOne')
-          .mockRejectedValue(
-            new HttpException('Category not found', HttpStatus.NOT_FOUND),
-          );
-        jest.spyOn(mockPostService, 'findOne').mockResolvedValue(expectedPost);
-
-        //act and assert
-        await expect(
-          service.modifyCategoryLink('FAKE-category-id', expectedPost.id),
-        ).rejects.toThrow(HttpException);
-        expect(mockPostService.save).not.toHaveBeenCalled();
-      });
-
-      xtest('If post is not found it should throw an error`', async () => {
-        //arrange
-        const expectedCategory = categoryMock();
-
-        jest.spyOn(service, 'findOne').mockResolvedValue(expectedCategory);
-        jest
-          .spyOn(mockPostService, 'findOne')
-          .mockRejectedValue(
-            new HttpException('Post not found', HttpStatus.NOT_FOUND),
-          );
-
-        //act and assert
-        await expect(
-          service.modifyCategoryLink(expectedCategory.id, 'FAKE-Post-id'),
-        ).rejects.toThrow(HttpException);
-        expect(mockPostService.save).not.toHaveBeenCalled();
-      });
     });
   });
 });
